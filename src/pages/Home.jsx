@@ -231,12 +231,6 @@ export default function Home() {
             <p className="font-body-lg text-body-lg text-secondary mb-10 max-w-2xl">{hero.subtext}</p>
             <div className="flex flex-wrap gap-4">
               <Link
-                to={hero.cta1Link}
-                className="bg-primary-container text-on-primary px-8 py-4 font-label-bold text-label-bold uppercase tracking-wider btn-primary-shadow btn-shadow hover:brightness-110"
-              >
-                {hero.cta1Text}
-              </Link>
-              <Link
                 to={hero.cta2Link}
                 className="border border-border-bold text-on-background px-8 py-4 font-label-bold text-label-bold uppercase tracking-wider hover:bg-on-background hover:text-on-primary transition-all"
               >

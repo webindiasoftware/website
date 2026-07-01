@@ -14,7 +14,7 @@ export const initial = {
     hero: {
       headline: 'Empowering Businesses With Innovative IT Solutions',
       subtext: 'Softskirl Infotech provides professional software development, mobile apps, ERP solutions, and digital services to help your business grow faster and smarter.',
-      cta1Text: 'Explore Services', cta1Link: '/services',
+      // cta1Text: 'Explore Services', cta1Link: '/services',
       cta2Text: 'View Products', cta2Link: '/products',
     },
     services: [
