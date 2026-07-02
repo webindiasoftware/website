@@ -7,6 +7,8 @@ const nav = [
   { to: '/admin/about', label: 'About Page', icon: 'person' },
   { to: '/admin/services', label: 'Services', icon: 'build' },
   { to: '/admin/products', label: 'Products', icon: 'inventory_2' },
+  { to: '/admin/navbar-menu', label: 'Products Menu', icon: 'menu' },
+  { to: '/admin/product-details', label: 'Product Details', icon: 'description' },
   { to: '/admin/blog', label: 'Blog', icon: 'article' },
   { to: '/admin/contacts', label: 'Contacts', icon: 'mail' },
   { to: '/admin/settings', label: 'Settings', icon: 'settings' },
@@ -17,7 +19,7 @@ export default function AdminLayout() {
   const navigate = useNavigate()
 
   const logout = () => {
-    localStorage.removeItem('admin_auth')
+    localStorage.removeItem('admin_token')
     navigate('/admin/login')
   }
 

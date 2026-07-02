@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useData } from '../context/DataContext'
 import { SaveButton, Section, Field, ListItem, AddButton } from './shared'
+import { persistContent } from './persistContent'
+import { FileUpload } from './FileUpload'
 
 let nextId = 100
 
@@ -8,14 +10,25 @@ export default function AdminHome() {
   const { data, dispatch } = useData()
   const [form, setForm] = useState(JSON.parse(JSON.stringify(data.home)))
   const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
 
   const touch = () => setSaved(false)
   const setNested = (section, key) => (e) => { setForm(f => ({ ...f, [section]: { ...f[section], [key]: e.target.value } })); touch() }
 
-  const save = () => {
-    dispatch({ type: 'SET_HOME', payload: form })
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+  const save = async () => {
+    setSaving(true)
+    setError('')
+    try {
+      await persistContent('home', form)
+      dispatch({ type: 'SET_HOME', payload: form })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } catch (err) {
+      setError(err.message || 'Failed to save changes.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   // Generic list updater
@@ -50,8 +63,9 @@ export default function AdminHome() {
         <div>
           <h1 className="text-2xl font-black tracking-tight text-[#1b1c1c]">Home Page</h1>
           <p className="text-sm text-gray-500 mt-1">Edit all content sections on the home page</p>
+          {error && <p className="text-xs text-red-600 font-medium mt-1">{error}</p>}
         </div>
-        <SaveButton onSave={save} saved={saved} />
+        <SaveButton onSave={save} saved={saved} saving={saving} />
       </div>
 
       {/* Hero */}
@@ -64,6 +78,12 @@ export default function AdminHome() {
           <Field label="CTA 2 Text" value={form.hero.cta2Text} onChange={setNested('hero', 'cta2Text')} />
           <Field label="CTA 2 Link" value={form.hero.cta2Link} onChange={setNested('hero', 'cta2Link')} />
         </div>
+        <FileUpload
+          label="Hero Video (leave empty to use the default video)"
+          kind="video"
+          value={form.hero.heroVideo}
+          onChange={(url) => { setForm(f => ({ ...f, hero: { ...f.hero, heroVideo: url } })); touch() }}
+        />
       </Section>
 
       {/* Services */}
@@ -71,10 +91,7 @@ export default function AdminHome() {
         <div className="space-y-3">
           {form.services.map((s, i) => (
             <ListItem key={s.id} index={i} onDelete={() => deleteFromList('services', s.id)}>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Icon (Material Symbol)" value={s.icon} onChange={e => updateList('services', s.id, 'icon', e.target.value)} />
-                <Field label="Title" value={s.title} onChange={e => updateList('services', s.id, 'title', e.target.value)} />
-              </div>
+              <Field label="Title" value={s.title} onChange={e => updateList('services', s.id, 'title', e.target.value)} />
               <Field label="Description" value={s.desc} onChange={e => updateList('services', s.id, 'desc', e.target.value)} rows={2} />
             </ListItem>
           ))}
@@ -92,7 +109,7 @@ export default function AdminHome() {
                 <Field label="Badge Text" value={p.badge} onChange={e => updateList('products', p.id, 'badge', e.target.value)} />
               </div>
               <Field label="Description" value={p.desc} onChange={e => updateList('products', p.id, 'desc', e.target.value)} rows={2} />
-              <Field label="Image URL" value={p.img} onChange={e => updateList('products', p.id, 'img', e.target.value)} />
+              <FileUpload label="Image" kind="image" value={p.img} onChange={(url) => updateList('products', p.id, 'img', url)} />
             </ListItem>
           ))}
         </div>
@@ -104,10 +121,7 @@ export default function AdminHome() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {form.industries.map((ind, i) => (
             <ListItem key={ind.id} index={i} onDelete={() => deleteFromList('industries', ind.id)}>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Icon" value={ind.icon} onChange={e => updateList('industries', ind.id, 'icon', e.target.value)} />
-                <Field label="Label" value={ind.label} onChange={e => updateList('industries', ind.id, 'label', e.target.value)} />
-              </div>
+              <Field label="Label" value={ind.label} onChange={e => updateList('industries', ind.id, 'label', e.target.value)} />
             </ListItem>
           ))}
         </div>
@@ -143,10 +157,7 @@ export default function AdminHome() {
           <div className="space-y-3">
             {form.whyUs.cards.map((c, i) => (
               <ListItem key={c.id} index={i} onDelete={() => { setForm(f => ({ ...f, whyUs: { ...f.whyUs, cards: f.whyUs.cards.filter(x => x.id !== c.id) } })); touch() }}>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="Icon" value={c.icon} onChange={e => updateCard(c.id, 'icon', e.target.value)} />
-                  <Field label="Title" value={c.title} onChange={e => updateCard(c.id, 'title', e.target.value)} />
-                </div>
+                <Field label="Title" value={c.title} onChange={e => updateCard(c.id, 'title', e.target.value)} />
                 <Field label="Description" value={c.desc} onChange={e => updateCard(c.id, 'desc', e.target.value)} rows={2} />
               </ListItem>
             ))}

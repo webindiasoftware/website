@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useData } from '../context/DataContext'
 import { Section, Field } from './shared'
+import { persistContent } from './persistContent'
+import { FileUpload } from './FileUpload'
 
 const blank = { slug: '', category: '', title: '', excerpt: '', img: '', date: new Date().toISOString().split('T')[0], published: true, content: '' }
 
@@ -9,6 +11,8 @@ export default function AdminBlog() {
   const [editing, setEditing] = useState(null) // null = list view, 'new' = new, id = edit existing
   const [form, setForm] = useState({ ...blank })
   const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }))
 
@@ -16,27 +20,54 @@ export default function AdminBlog() {
   const openEdit = (post) => { setForm({ ...post }); setEditing(post.id) }
   const cancelEdit = () => { setEditing(null); setSaved(false) }
 
-  const save = () => {
-    if (editing === 'new') {
-      dispatch({ type: 'ADD_POST', payload: { ...form, id: Date.now() } })
-    } else {
-      dispatch({ type: 'UPDATE_POST', payload: form })
+  const save = async () => {
+    const posts = editing === 'new'
+      ? [...data.blog.posts, { ...form, id: Date.now() }]
+      : data.blog.posts.map(p => p.id === form.id ? form : p)
+    const nextBlog = { ...data.blog, posts }
+    setSaving(true)
+    setError('')
+    try {
+      await persistContent('blog', nextBlog)
+      dispatch({ type: 'SET_BLOG', payload: nextBlog })
+      setSaved(true)
+      setTimeout(() => { setSaved(false); setEditing(null) }, 1200)
+    } catch (err) {
+      setError(err.message || 'Failed to save changes.')
+    } finally {
+      setSaving(false)
     }
-    setSaved(true)
-    setTimeout(() => { setSaved(false); setEditing(null) }, 1200)
   }
 
-  const deletePost = (id) => {
-    if (confirm('Delete this post?')) dispatch({ type: 'DELETE_POST', payload: id })
+  const deletePost = async (id) => {
+    if (!confirm('Delete this post?')) return
+    const nextBlog = { ...data.blog, posts: data.blog.posts.filter(p => p.id !== id) }
+    try {
+      await persistContent('blog', nextBlog)
+      dispatch({ type: 'SET_BLOG', payload: nextBlog })
+    } catch (err) {
+      setError(err.message || 'Failed to delete post.')
+    }
   }
 
   // Featured post editor
   const [featForm, setFeatForm] = useState({ ...data.blog.featured })
   const [featSaved, setFeatSaved] = useState(false)
-  const saveFeatured = () => {
-    dispatch({ type: 'SET_BLOG_FEATURED', payload: featForm })
-    setFeatSaved(true)
-    setTimeout(() => setFeatSaved(false), 2000)
+  const [featSaving, setFeatSaving] = useState(false)
+  const saveFeatured = async () => {
+    const nextBlog = { ...data.blog, featured: featForm }
+    setFeatSaving(true)
+    setError('')
+    try {
+      await persistContent('blog', nextBlog)
+      dispatch({ type: 'SET_BLOG', payload: nextBlog })
+      setFeatSaved(true)
+      setTimeout(() => setFeatSaved(false), 2000)
+    } catch (err) {
+      setError(err.message || 'Failed to save featured post.')
+    } finally {
+      setFeatSaving(false)
+    }
   }
 
   if (editing !== null) {
@@ -48,14 +79,15 @@ export default function AdminBlog() {
               {editing === 'new' ? 'New Blog Post' : 'Edit Post'}
             </h1>
             <p className="text-sm text-gray-500 mt-1">{editing === 'new' ? 'Create a new article' : `Editing: ${form.title}`}</p>
+            {error && <p className="text-xs text-red-600 font-medium mt-1">{error}</p>}
           </div>
           <div className="flex gap-3">
             <button onClick={cancelEdit} className="px-4 py-2 border border-gray-300 text-sm font-medium hover:bg-gray-50 transition-colors">
               Cancel
             </button>
-            <button onClick={save} className={`px-5 py-2 text-sm font-bold uppercase tracking-wider transition-colors flex items-center gap-2 ${saved ? 'bg-green-600 text-white' : 'bg-[#1b1c1c] text-white hover:bg-[#106F89]'}`}>
+            <button onClick={save} disabled={saving} className={`px-5 py-2 text-sm font-bold uppercase tracking-wider transition-colors flex items-center gap-2 disabled:opacity-50 ${saved ? 'bg-green-600 text-white' : 'bg-[#1b1c1c] text-white hover:bg-[#106F89]'}`}>
               <span className="material-symbols-outlined text-base">{saved ? 'check' : 'save'}</span>
-              {saved ? 'Saved!' : 'Save Post'}
+              {saving ? 'Saving…' : saved ? 'Saved!' : 'Save Post'}
             </button>
           </div>
         </div>
@@ -68,8 +100,7 @@ export default function AdminBlog() {
             <Field label="Date" value={form.date} onChange={set('date')} type="date" />
           </div>
           <Field label="Excerpt" value={form.excerpt} onChange={set('excerpt')} rows={2} />
-          <Field label="Cover Image URL" value={form.img} onChange={set('img')} />
-          {form.img && <img src={form.img} alt="preview" className="h-32 w-auto object-cover border border-gray-200" />}
+          <FileUpload label="Cover Image" kind="image" value={form.img} onChange={(url) => setForm(f => ({ ...f, img: url }))} />
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={form.published} onChange={set('published')} className="w-4 h-4 accent-[#106F89]" />
             <span className="text-sm font-medium">Published</span>
@@ -90,6 +121,7 @@ export default function AdminBlog() {
         <div>
           <h1 className="text-2xl font-black tracking-tight text-[#1b1c1c]">Blog Management</h1>
           <p className="text-sm text-gray-500 mt-1">Create and manage blog posts</p>
+          {error && <p className="text-xs text-red-600 font-medium mt-1">{error}</p>}
         </div>
         <button onClick={openNew} className="bg-[#1b1c1c] text-white px-5 py-2.5 text-sm font-bold uppercase tracking-wider hover:bg-[#106F89] transition-colors flex items-center gap-2">
           <span className="material-symbols-outlined text-base">add</span>
@@ -101,8 +133,8 @@ export default function AdminBlog() {
       <div className="bg-white border border-gray-200 mb-6">
         <div className="px-6 py-4 border-b border-gray-100 bg-yellow-50 flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">Featured Article (Blog Hero)</h2>
-          <button onClick={saveFeatured} className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${featSaved ? 'bg-green-600 text-white' : 'bg-[#1b1c1c] text-white hover:bg-[#106F89]'}`}>
-            {featSaved ? 'Saved!' : 'Save Featured'}
+          <button onClick={saveFeatured} disabled={featSaving} className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 ${featSaved ? 'bg-green-600 text-white' : 'bg-[#1b1c1c] text-white hover:bg-[#106F89]'}`}>
+            {featSaving ? 'Saving…' : featSaved ? 'Saved!' : 'Save Featured'}
           </button>
         </div>
         <div className="p-6 space-y-3">
@@ -112,7 +144,7 @@ export default function AdminBlog() {
           </div>
           <Field label="Title" value={featForm.title} onChange={e => setFeatForm(f => ({ ...f, title: e.target.value }))} />
           <Field label="Excerpt" value={featForm.excerpt} onChange={e => setFeatForm(f => ({ ...f, excerpt: e.target.value }))} rows={2} />
-          <Field label="Image URL" value={featForm.img} onChange={e => setFeatForm(f => ({ ...f, img: e.target.value }))} />
+          <FileUpload label="Image" kind="image" value={featForm.img} onChange={(url) => setFeatForm(f => ({ ...f, img: url }))} />
         </div>
       </div>
 

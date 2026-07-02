@@ -26,70 +26,13 @@ function NavLink({ to, children, isActive }) {
   )
 }
 
-const productCategories = [
-  {
-    title: 'Operations',
-    items: [
-      {
-        name: 'SkirlWorks',
-        desc: 'End-to-end business management suite for growing enterprises',
-        icon: 'work_history',
-        bgColor: 'bg-[#f3e8ff]',
-        iconColor: 'text-[#a855f7]',
-        url: '/products/skirlworks'
-      },
-      {
-        name: 'SkirlMMS',
-        desc: 'Merchant management system to onboard, manage, and monitor networks',
-        icon: 'storefront',
-        bgColor: 'bg-[#e6f7f4]',
-        iconColor: 'text-[#14b8a6]',
-        url: '/products/skirlmms'
-      }
-    ]
-  },
-  {
-    title: 'Enterprise',
-    items: [
-      {
-        name: 'SkirlHRMS',
-        desc: 'Human resource management system for payroll and attendance',
-        icon: 'people',
-        bgColor: 'bg-[#dbeafe]',
-        iconColor: 'text-[#3b82f6]',
-        url: '/products/skirlhrms'
-      },
-      {
-        name: 'SkirlERP',
-        desc: 'Comprehensive ERP for finance, HR, and sales management',
-        icon: 'account_tree',
-        bgColor: 'bg-[#ffedd5]',
-        iconColor: 'text-[#f97316]',
-        url: '/products/skirlerp'
-      }
-    ]
-  },
-  {
-    title: 'Specialized',
-    items: [
-      {
-        name: 'FitBuddy',
-        desc: 'Gym & fitness club automation with member app and billing',
-        icon: 'fitness_center',
-        bgColor: 'bg-[#fce7f3]',
-        iconColor: 'text-[#ec4899]',
-        url: '/products/fitbuddy'
-      }
-    ]
-  }
-]
-
 export default function Navbar() {
   const [isOpen, setIsOpen]           = useState(false)
   const [dropOpen, setDropOpen]       = useState(false)
   const [mobileProds, setMobileProds] = useState(false)
   const { pathname } = useLocation()
   const { data }     = useData()
+  const productCategories = data.navbarProducts
   const leaveTimer   = useRef(null)
 
   useEffect(() => { setIsOpen(false); setDropOpen(false) }, [pathname])

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useData } from '../context/DataContext'
 import useScrollReveal from '../hooks/useScrollReveal'
-import heroVideo from '../assets/hero-video.mp4'
+import defaultHeroVideo from '../assets/hero-video.mp4'
 
 import corporateImg from '../assets/corporate.png'
 import retailImg from '../assets/retail.png'
@@ -241,7 +241,7 @@ export default function Home() {
           <div className="lg:col-span-5 relative min-h-[320px] lg:min-h-[400px]">
             <div className="w-full h-full overflow-hidden min-h-80 rounded-2xl">
               <video
-                src={heroVideo}
+                src={hero.heroVideo || defaultHeroVideo}
                 autoPlay
                 muted
                 loop

@@ -1,19 +1,30 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { login, ApiError } from '../api/client'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.email || !form.password) {
       setError('Please fill in all fields.')
       return
     }
-    localStorage.setItem('admin_auth', '1')
-    navigate('/admin')
+    setLoading(true)
+    setError('')
+    try {
+      const token = await login(form.email, form.password)
+      localStorage.setItem('admin_token', token)
+      navigate('/admin')
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not reach the server. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const set = (key) => (e) => { setForm(f => ({ ...f, [key]: e.target.value })); setError('') }
@@ -67,9 +78,10 @@ export default function AdminLogin() {
 
             <button
               type="submit"
-              className="w-full bg-[#1b1c1c] text-white py-3.5 text-sm font-bold uppercase tracking-widest hover:bg-[#106F89] transition-colors duration-200 mt-2"
+              disabled={loading}
+              className="w-full bg-[#1b1c1c] text-white py-3.5 text-sm font-bold uppercase tracking-widest hover:bg-[#106F89] transition-colors duration-200 mt-2 disabled:opacity-50"
             >
-              Sign In
+              {loading ? 'Signing In…' : 'Sign In'}
             </button>
           </form>
         </div>

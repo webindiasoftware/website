@@ -1,6 +1,11 @@
-import { createContext, useContext, useReducer, useEffect } from 'react'
+import { createContext, useContext, useReducer, useEffect, useState } from 'react'
+import { getContent } from '../api/client'
 
 const KEY = 'softskirl_cms_v1'
+
+// Sections backed by the real backend (Content collection). Everything else
+// in `initial` (about, global, contactSubmissions) stays localStorage-only.
+const BACKEND_KEYS = ['home', 'services', 'products', 'navbarProducts', 'blog', 'productDetails']
 
 export const initial = {
   global: {
@@ -16,6 +21,7 @@ export const initial = {
       subtext: 'Softskirl Infotech provides professional software development, mobile apps, ERP solutions, and digital services to help your business grow faster and smarter.',
       // cta1Text: 'Explore Services', cta1Link: '/services',
       cta2Text: 'View Products', cta2Link: '/products',
+      heroVideo: '',
     },
     services: [
       { id: 1, icon: 'code', title: 'Website Development', desc: 'Custom websites and SEO-optimized code for maximum visibility and architectural cleanness.' },
@@ -103,6 +109,128 @@ export const initial = {
     ],
     cta: { headline: 'Ready to Start Your Project?', body: 'Join the ranks of high-performance enterprises leveraging Softskirl technology to redefine their operational capabilities.', ctaText: 'Get a Free Quote' },
   },
+  navbarProducts: [
+    {
+      id: 1,
+      title: 'Operations',
+      items: [
+        { id: 1, name: 'SkirlWorks', desc: 'End-to-end business management suite for growing enterprises', icon: 'work_history', bgColor: 'bg-[#f3e8ff]', iconColor: 'text-[#a855f7]', url: '/products/skirlworks' },
+        { id: 2, name: 'SkirlMMS', desc: 'Merchant management system to onboard, manage, and monitor networks', icon: 'storefront', bgColor: 'bg-[#e6f7f4]', iconColor: 'text-[#14b8a6]', url: '/products/skirlmms' },
+      ],
+    },
+    {
+      id: 2,
+      title: 'Enterprise',
+      items: [
+        { id: 1, name: 'SkirlHRMS', desc: 'Human resource management system for payroll and attendance', icon: 'people', bgColor: 'bg-[#dbeafe]', iconColor: 'text-[#3b82f6]', url: '/products/skirlhrms' },
+        { id: 2, name: 'SkirlERP', desc: 'Comprehensive ERP for finance, HR, and sales management', icon: 'account_tree', bgColor: 'bg-[#ffedd5]', iconColor: 'text-[#f97316]', url: '/products/skirlerp' },
+      ],
+    },
+    {
+      id: 3,
+      title: 'Specialized',
+      items: [
+        { id: 1, name: 'FitBuddy', desc: 'Gym & fitness club automation with member app and billing', icon: 'fitness_center', bgColor: 'bg-[#fce7f3]', iconColor: 'text-[#ec4899]', url: '/products/fitbuddy' },
+      ],
+    },
+  ],
+  productDetails: {
+    fitbuddy: {
+      name: 'FitBuddy', badge: 'v4.2 Active', badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      category: 'Fitness & Wellness', tagline: 'Next-Gen Fitness Hub Automation & Billing',
+      heroDesc: 'Streamline gym operations with biometric check-ins, automated billing cycles, class scheduling, and real-time member analytics. Built for modern fitness businesses that demand precision.',
+      heroImg: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80',
+      capabilities: [
+        { title: 'Biometric Check-in Engine', desc: 'Low-latency fingerprint and face-ID validation at entry points with instant membership status display.', icon: 'fingerprint', img: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&q=80' },
+        { title: 'Smart Class Scheduler', desc: 'Cross-platform booking with capacity monitoring, waitlist automation, and trainer assignment logic.', icon: 'calendar_month', img: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80' },
+        { title: 'Revenue Analytics', desc: 'ML-driven subscription renewal forecasting, churn prediction, and automated payment reconciliation.', icon: 'trending_up', img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&q=80' },
+      ],
+      spotlight1: { title: 'Member Lifecycle Management', desc: 'Track every member from first visit to long-term retention. Automated onboarding flows, progress tracking dashboards, and personalized communication pipelines ensure no member falls through the cracks.', bullets: ['Automated welcome sequences', 'BMI & fitness progress charts', 'Renewal reminder workflows', 'Referral program tracking'], img: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=700&q=80' },
+      spotlight2: { title: 'Multi-Branch Operations Control', desc: 'Manage unlimited gym locations from a single command center. Centralized inventory, staff scheduling, and financial reporting with branch-level granularity.', bullets: ['Unified dashboard across locations', 'Staff shift management', 'Equipment maintenance logs', 'Cross-branch membership transfers'], img: 'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=700&q=80' },
+      specs: {
+        database: { label: 'Database Layer', value: 'PostgreSQL 15 + Redis Cache', icon: 'database' },
+        api: { label: 'API Protocol', value: 'REST + WebSocket Live Feeds', icon: 'api' },
+        hosting: { label: 'Hosting Environment', value: 'AWS ECS Fargate (Auto-Scale)', icon: 'cloud' },
+        uptime: { label: 'Uptime Target', value: '99.95% SLA Guarantee', icon: 'verified' },
+      },
+    },
+    skirlworks: {
+      name: 'SkirlWorks', badge: 'Active', badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
+      category: 'Operations & Workflow', tagline: 'Integrated Operations & Work Intelligence Platform',
+      heroDesc: 'Visually structure deliverables, track pipeline status, and automate quotes. SkirlWorks unifies project management, resource allocation, and client communications into one powerful platform.',
+      heroImg: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+      capabilities: [
+        { title: 'Algorithmic Job Dispatch', desc: 'Optimized job allocations based on skill matching, location proximity, and workload balancing algorithms.', icon: 'account_tree', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80' },
+        { title: 'Predictive Work Intelligence', desc: 'ML-driven workflow bottleneck detection, resource utilization scoring, and delivery prediction models.', icon: 'analytics', img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&q=80' },
+        { title: 'Dynamic Quote Builder', desc: 'Multi-constraint pricing engine that generates accurate service estimates based on scope, timeline, and resources.', icon: 'description', img: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=500&q=80' },
+      ],
+      spotlight1: { title: 'Pipeline Visualization Engine', desc: 'Interactive job flow charts displaying pipeline states, trigger conditions, and dependency maps. Real-time status updates keep every stakeholder aligned on project health.', bullets: ['Drag-and-drop pipeline builder', 'Milestone dependency tracking', 'Automated status notifications', 'Custom pipeline templates'], img: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=700&q=80' },
+      spotlight2: { title: 'Team Performance Dashboard', desc: 'Granular engineering metrics with automated complexity scoring, velocity tracking, and resource utilization analysis across all active projects.', bullets: ['Sprint velocity analytics', 'Individual contribution metrics', 'Capacity planning forecasts', 'Burndown chart automation'], img: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=700&q=80' },
+      specs: {
+        database: { label: 'Database Layer', value: 'MongoDB Atlas + Elasticsearch', icon: 'database' },
+        api: { label: 'API Protocol', value: 'GraphQL + gRPC Microservices', icon: 'api' },
+        hosting: { label: 'Hosting Environment', value: 'GCP Cloud Run (Serverless)', icon: 'cloud' },
+        uptime: { label: 'Uptime Target', value: '99.9% SLA Guarantee', icon: 'verified' },
+      },
+    },
+    skirlhrms: {
+      name: 'SkirlHRMS', badge: 'Enterprise Ready', badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
+      category: 'Human Resources', tagline: 'Workforce Analytics & Payroll Scaling Engine',
+      heroDesc: 'Unify staff registries, clock-in locations, tax computation systems, and compliance audits. SkirlHRMS delivers end-to-end human capital management for enterprises of any scale.',
+      heroImg: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80',
+      capabilities: [
+        { title: 'Advanced Shift Dispatch', desc: 'Automated scheduling and allocation engine supporting global timezones, holidays, and labor law compliance.', icon: 'schedule', img: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=500&q=80' },
+        { title: 'Geo-Fenced Attendance', desc: 'Mobile-first punch system with GPS validation, site perimeter checks, and real-time attendance dashboards.', icon: 'location_on', img: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=500&q=80' },
+        { title: 'Multi-Constraint Payroll', desc: 'Dynamic tax computation, deduction matrices, and automated wire transfers supporting multi-currency operations.', icon: 'account_balance_wallet', img: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=500&q=80' },
+      ],
+      spotlight1: { title: 'Employee Lifecycle Portal', desc: 'From onboarding documentation to exit interviews, manage the complete employee journey with configurable workflow templates and automated compliance checkpoints.', bullets: ['Digital onboarding workflows', 'Performance review cycles', 'Training & certification tracking', 'Exit process automation'], img: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=700&q=80' },
+      spotlight2: { title: 'Compliance & Audit Engine', desc: 'Built-in regulatory compliance frameworks for labor laws, tax codes, and industry standards. Automated audit trails ensure every action is traceable and documented.', bullets: ['Labor law compliance checks', 'Automated tax filing', 'Immutable audit logs', 'Custom policy enforcement'], img: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=700&q=80' },
+      specs: {
+        database: { label: 'Database Layer', value: 'PostgreSQL 15 + TimescaleDB', icon: 'database' },
+        api: { label: 'API Protocol', value: 'REST API v3 + OAuth 2.0', icon: 'api' },
+        hosting: { label: 'Hosting Environment', value: 'Azure Kubernetes Service', icon: 'cloud' },
+        uptime: { label: 'Uptime Target', value: '99.99% SLA Guarantee', icon: 'verified' },
+      },
+    },
+    skirlmms: {
+      name: 'SkirlMMS', badge: 'Active', badgeColor: 'bg-teal-50 text-teal-700 border-teal-200',
+      category: 'Merchant & Payments', tagline: 'Merchant Networks & Settlement Portal',
+      heroDesc: 'Onboard merchant tiers, track rate configurations, and protect transactional integrity. SkirlMMS provides enterprise-grade merchant lifecycle management with real-time settlement processing.',
+      heroImg: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
+      capabilities: [
+        { title: 'Automated KYC Engine', desc: 'Business verification automation with document OCR, compliance scoring, and digital contract signature workflows.', icon: 'person_add', img: 'https://images.unsplash.com/photo-1563986768609-322da13575f2?w=500&q=80' },
+        { title: 'Real-Time Settlement', desc: 'Instant monitoring of network payments, batch settlements, and merchant payout schedules with full reconciliation.', icon: 'point_of_sale', img: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500&q=80' },
+        { title: 'Fraud Risk Scoring', desc: 'Transaction velocity analysis, anomaly detection, and automated card ban triggers for zero-tolerance fraud protection.', icon: 'security', img: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=500&q=80' },
+      ],
+      spotlight1: { title: 'Merchant Tier Management', desc: 'Configure custom pricing tiers, volume-based discounts, and regional rate schedules. Automated tier upgrades based on transaction volume thresholds.', bullets: ['Custom pricing matrices', 'Volume-based tier automation', 'Regional rate configuration', 'Contract renewal workflows'], img: 'https://images.unsplash.com/photo-1556742111-a301076d9d18?w=700&q=80' },
+      spotlight2: { title: 'Terminal Fleet Management', desc: 'Monitor physical POS terminal health, firmware versions, and connectivity status across your entire merchant network from a unified dashboard.', bullets: ['Live terminal health monitoring', 'OTA firmware updates', 'Network diagnostics', 'Replacement workflow automation'], img: 'https://images.unsplash.com/photo-1556742205-e10c9486e506?w=700&q=80' },
+      specs: {
+        database: { label: 'Database Layer', value: 'CockroachDB (Distributed)', icon: 'database' },
+        api: { label: 'API Protocol', value: 'REST + ISO 8583 Gateway', icon: 'api' },
+        hosting: { label: 'Hosting Environment', value: 'AWS EKS Multi-Region', icon: 'cloud' },
+        uptime: { label: 'Uptime Target', value: '99.999% SLA Guarantee', icon: 'verified' },
+      },
+    },
+    skirlerp: {
+      name: 'SkirlERP', badge: 'Enterprise Ready', badgeColor: 'bg-orange-50 text-orange-700 border-orange-200',
+      category: 'Enterprise Resource Planning', tagline: 'Unified Enterprise Resource & Inventory Planning',
+      heroDesc: 'GAAP-compliant double-entry ledgers, warehouse inventory synchronization, and multi-depot logistics. SkirlERP delivers complete financial and operational control for complex enterprise environments.',
+      heroImg: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80',
+      capabilities: [
+        { title: 'Resource Allocation Engine', desc: 'Optimized inventory routing across multiple warehouses with demand forecasting and automatic reorder triggers.', icon: 'hub', img: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=500&q=80' },
+        { title: 'Double-Entry Ledger', desc: 'GAAP-compliant journal management with automated balance sheet generation, cashflow tracking, and fiscal reporting.', icon: 'balance', img: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=500&q=80' },
+        { title: 'Logistics Orchestration', desc: 'Dynamic shipping route optimization, carrier management, and real-time freight tracking across global supply chains.', icon: 'local_shipping', img: 'https://images.unsplash.com/photo-1494412574643-ff11b0a5eb19?w=500&q=80' },
+      ],
+      spotlight1: { title: 'Financial Command Center', desc: 'Centralized financial oversight with real-time P&L statements, automated tax calculations, and multi-entity consolidation for group-level reporting.', bullets: ['Real-time P&L dashboards', 'Multi-currency support', 'Automated tax computation', 'Group consolidation reporting'], img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=700&q=80' },
+      spotlight2: { title: 'Supply Chain Intelligence', desc: 'End-to-end supply chain visibility with predictive stock-out alerts, supplier performance scoring, and automated procurement workflows.', bullets: ['Predictive stock-out alerts', 'Supplier scorecards', 'Automated PO generation', 'Quality inspection workflows'], img: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=700&q=80' },
+      specs: {
+        database: { label: 'Database Layer', value: 'Oracle 19c + Redis Cluster', icon: 'database' },
+        api: { label: 'API Protocol', value: 'REST + SOAP (Legacy Bridge)', icon: 'api' },
+        hosting: { label: 'Hosting Environment', value: 'On-Prem + Azure Hybrid', icon: 'cloud' },
+        uptime: { label: 'Uptime Target', value: '99.99% SLA Guarantee', icon: 'verified' },
+      },
+    },
+  },
   blog: {
     featured: { slug: 'erp-transformation', category: 'ERP SYSTEMS', title: 'How ERP Software Transforms Business Operations', excerpt: 'An in-depth exploration of how next-generation enterprise resource planning systems are leveraging AI to automate complex logistical workflows and drive operational efficiency.', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7ssQUoXWIM4tPsvXp35RDsntHBrNVOusJzfs8aOWjOQs-__kxXOA6PW2s2qyA5JydmH1yrhccZPQtnEnqeWrZGnGHxrp3prdLPuWCPRPFubYHtnIQljPIp_LAISMUPlJt5pwZuCGlPK-VAUy4oSVQ0aV3dWWfyHmmsMs3MhHYybURCaeN5ocwJ3fs5Y22DG63FBM3XInh_Wpn3ZwvIQ8ddiqJP6medCHH7pglhlfps-V6r1Ff31hSGb_qFBihwwlh8gHKib9lf5C2' },
     posts: [
@@ -121,6 +249,11 @@ function reducer(state, action) {
     case 'SET_ABOUT': return { ...state, about: { ...state.about, ...action.payload } }
     case 'SET_SERVICES': return { ...state, services: { ...state.services, ...action.payload } }
     case 'SET_PRODUCTS': return { ...state, products: { ...state.products, ...action.payload } }
+    // Plain-replace (not merge) — navbarProducts is an array and productDetails needs
+    // real key deletion when an admin removes an entry; a shallow spread-merge can't do that.
+    case 'SET_NAVBAR_PRODUCTS': return { ...state, navbarProducts: action.payload }
+    case 'SET_PRODUCT_DETAILS': return { ...state, productDetails: action.payload }
+    case 'SET_BLOG': return { ...state, blog: { ...state.blog, ...action.payload } }
     case 'SET_BLOG_FEATURED': return { ...state, blog: { ...state.blog, featured: { ...state.blog.featured, ...action.payload } } }
     case 'ADD_POST': return { ...state, blog: { ...state.blog, posts: [...state.blog.posts, action.payload] } }
     case 'UPDATE_POST': return { ...state, blog: { ...state.blog, posts: state.blog.posts.map(p => p.id === action.payload.id ? action.payload : p) } }
@@ -134,26 +267,55 @@ function reducer(state, action) {
 
 const DataCtx = createContext(null)
 
+const ACTION_FOR_KEY = {
+  home: 'SET_HOME',
+  services: 'SET_SERVICES',
+  products: 'SET_PRODUCTS',
+  navbarProducts: 'SET_NAVBAR_PRODUCTS',
+  blog: 'SET_BLOG',
+  productDetails: 'SET_PRODUCT_DETAILS',
+}
+
 export function DataProvider({ children }) {
   const stored = (() => {
     try {
       const s = localStorage.getItem(KEY)
       if (!s) return null
       const parsed = JSON.parse(s)
+      // Merge over `initial` so sections added after a user's last visit (e.g. navbarProducts,
+      // productDetails) exist even if their cached blob predates them.
+      const merged = { ...initial, ...parsed }
       // If stored products don't have the icon/url fields, reset products to initial
-      if (!parsed?.products?.items?.[0]?.icon) {
-        return { ...parsed, products: initial.products }
+      if (!merged?.products?.items?.[0]?.icon) {
+        merged.products = initial.products
       }
-      return parsed
+      return merged
     } catch { return null }
   })()
   const [data, dispatch] = useReducer(reducer, stored || initial)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     try { localStorage.setItem(KEY, JSON.stringify(data)) } catch {}
   }, [data])
 
-  return <DataCtx.Provider value={{ data, dispatch }}>{children}</DataCtx.Provider>
+  // Hydrate the backend-backed sections on mount. Each key is independent — one
+  // failing (e.g. backend down) must not block the others or blank the site.
+  useEffect(() => {
+    Promise.allSettled(BACKEND_KEYS.map((key) => getContent(key))).then((results) => {
+      results.forEach((result, i) => {
+        const key = BACKEND_KEYS[i]
+        if (result.status === 'fulfilled') {
+          dispatch({ type: ACTION_FOR_KEY[key], payload: result.value })
+        } else {
+          console.warn(`Could not load "${key}" from backend, using local defaults:`, result.reason?.message)
+        }
+      })
+      setLoading(false)
+    })
+  }, [])
+
+  return <DataCtx.Provider value={{ data, dispatch, loading }}>{children}</DataCtx.Provider>
 }
 
 export function useData() {

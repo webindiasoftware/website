@@ -18,6 +18,8 @@ import AdminHome from './admin/AdminHome'
 import AdminAbout from './admin/AdminAbout'
 import AdminServices from './admin/AdminServices'
 import AdminProducts from './admin/AdminProducts'
+import AdminNavbarMenu from './admin/AdminNavbarMenu'
+import AdminProductDetails from './admin/AdminProductDetails'
 import AdminBlog from './admin/AdminBlog'
 import AdminContacts from './admin/AdminContacts'
 import AdminGlobal from './admin/AdminGlobal'
@@ -62,6 +64,8 @@ export default function App() {
             <Route path="about" element={<AdminAbout />} />
             <Route path="services" element={<AdminServices />} />
             <Route path="products" element={<AdminProducts />} />
+            <Route path="navbar-menu" element={<AdminNavbarMenu />} />
+            <Route path="product-details" element={<AdminProductDetails />} />
             <Route path="blog" element={<AdminBlog />} />
             <Route path="contacts" element={<AdminContacts />} />
             <Route path="settings" element={<AdminGlobal />} />

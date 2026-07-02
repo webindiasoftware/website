@@ -85,16 +85,17 @@ export function AddButton({ onClick, label = 'Add Item' }) {
   )
 }
 
-export function SaveButton({ onSave, saved }) {
+export function SaveButton({ onSave, saved, saving }) {
   return (
     <button
       onClick={onSave}
-      className={`px-5 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors flex items-center gap-2 shrink-0 ${
+      disabled={saving}
+      className={`px-5 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors flex items-center gap-2 shrink-0 disabled:opacity-50 ${
         saved ? 'bg-green-600 text-white' : 'bg-[#1b1c1c] text-white hover:bg-[#106F89]'
       }`}
     >
       <span className="material-symbols-outlined text-base">{saved ? 'check' : 'save'}</span>
-      {saved ? 'Saved!' : 'Save'}
+      {saving ? 'Saving…' : saved ? 'Saved!' : 'Save'}
     </button>
   )
 }
