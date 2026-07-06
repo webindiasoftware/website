@@ -9,16 +9,9 @@ const techDiagram = [
   { red: true }, {}, { dash: true }, { red: true },
 ]
 
-const securityStats = [
-  { stat: '256-bit', label: 'Encryption' },
-  { stat: '99.9%', label: 'Durability' },
-  { stat: 'MTLS', label: 'Auth Flow' },
-  { stat: 'Zero', label: 'Trust Model' },
-]
-
 export default function Services() {
   const { data } = useData()
-  const { hero, coreServices, cta } = data.services
+  const { hero, heroButtons, coreIntro, coreServices, deepDive, standOut, cta } = data.services
 
   const heroRef = useScrollReveal()
   const gridRef = useScrollReveal()
@@ -40,10 +33,10 @@ export default function Services() {
           <p className="font-body-lg text-body-lg text-secondary max-w-2xl mb-12">{hero.subtext}</p>
           <div className="flex flex-wrap gap-4">
             <button className="bg-on-background text-on-primary px-8 md:px-10 py-4 md:py-5 font-label-bold text-label-bold uppercase tracking-widest hover:bg-primary-container transition-colors">
-              View Ecosystem
+              {heroButtons.primaryText}
             </button>
             <button className="bento-border text-on-background px-8 md:px-10 py-4 md:py-5 font-label-bold text-label-bold uppercase tracking-widest hover:bg-surface-muted transition-colors">
-              Read Case Studies
+              {heroButtons.secondaryText}
             </button>
           </div>
         </div>
@@ -53,8 +46,8 @@ export default function Services() {
       <section ref={gridRef} className="py-24 px-5 md:px-12 max-w-container-max mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-4">
           <div>
-            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-4">Core Competencies</h2>
-            <p className="text-secondary font-body-md text-body-md">Precision modules built for high-performance enterprise applications.</p>
+            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-4">{coreIntro.heading}</h2>
+            <p className="text-secondary font-body-md text-body-md">{coreIntro.subtext}</p>
           </div>
           <div className="hidden md:block">
             <div className="bento-border p-4 bg-surface-muted">
@@ -80,14 +73,12 @@ export default function Services() {
       <section ref={archRef} className="border-t border-b border-border-bold overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 min-h-[400px] md:min-h-[600px]">
           <div className="p-8 md:p-24 border-b md:border-b-0 md:border-r border-border-bold flex flex-col justify-center">
-            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-8">High-Performance Architecture</h2>
+            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-8">{deepDive.architecture.heading}</h2>
             <p className="font-body-lg text-body-lg text-secondary mb-12">
-              Our engineering team prioritizes structural integrity over stylistic trends. We build systems
-              that handle traffic surges with sub-millisecond latency through aggressive caching and
-              intelligent load balancing.
+              {deepDive.architecture.body}
             </p>
             <ul className="space-y-4">
-              {['Microservices Orchestration', 'Stateless Logic Processing', 'Redundant Failover Systems'].map((item) => (
+              {deepDive.architecture.bullets.map((item) => (
                 <li key={item} className="flex items-center gap-4 font-label-bold text-label-bold uppercase tracking-wider">
                   <span className="w-2 h-2 bg-primary shrink-0"></span> {item}
                 </li>
@@ -111,9 +102,9 @@ export default function Services() {
           <div className="bg-on-background order-2 md:order-1 relative p-8 md:p-12 flex items-center justify-center overflow-hidden min-h-[320px]">
             <div className="relative z-10 w-full max-w-md text-on-primary">
               <div className="grid grid-cols-2 gap-6 md:gap-8">
-                {securityStats.map(({ stat, label }) => (
-                  <div key={label} className="p-6 md:p-8 border border-white/20 bg-white/5">
-                    <span className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-primary block mb-2">{stat}</span>
+                {deepDive.security.stats.map(({ id, value, label }) => (
+                  <div key={id} className="p-6 md:p-8 border border-white/20 bg-white/5">
+                    <span className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-primary block mb-2">{value}</span>
                     <span className="font-label-bold text-label-bold uppercase tracking-wider text-primary">{label}</span>
                   </div>
                 ))}
@@ -121,14 +112,12 @@ export default function Services() {
             </div>
           </div>
           <div className="p-8 md:p-24 flex flex-col justify-center order-1 md:order-2">
-            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-8">Secure Data Isolation</h2>
+            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-8">{deepDive.security.heading}</h2>
             <p className="font-body-lg text-body-lg text-secondary mb-12">
-              Security isn't a feature; it's the foundation. Our multi-tenancy model ensures cryptographic
-              isolation for every client, preventing cross-domain vulnerabilities and ensuring compliance
-              with global standards.
+              {deepDive.security.body}
             </p>
             <button className="w-fit bento-border px-8 py-4 font-label-bold text-label-bold uppercase tracking-widest hover:bg-on-background hover:text-on-primary transition-all duration-300">
-              Review Security Protocol
+              {deepDive.security.buttonText}
             </button>
           </div>
         </div>
@@ -136,38 +125,38 @@ export default function Services() {
 
       {/* ── Stats Bento ── */}
       <section ref={statsRef} className="py-24 px-5 md:px-12 max-w-container-max mx-auto">
-        <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-center mb-16">Why Our Services Stand Out</h2>
+        <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-center mb-16">{standOut.heading}</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="md:col-span-2 bento-border p-8 md:p-12 bg-surface-muted flex flex-col justify-between min-h-[220px]">
             <div className="flex justify-between items-start">
-              <span className="font-headline-xl text-headline-lg-mobile md:text-headline-xl font-black">99.9%</span>
+              <span className="font-headline-xl text-headline-lg-mobile md:text-headline-xl font-black">{standOut.stats[0].value}</span>
               <span className="material-symbols-outlined text-primary text-3xl">speed</span>
             </div>
             <div>
-              <h4 className="font-label-bold text-label-bold uppercase tracking-widest text-primary mb-2">Uptime Guarantee</h4>
-              <p className="text-secondary font-body-md text-body-md">Precision monitoring and redundant failovers ensure zero-downtime performance.</p>
+              <h4 className="font-label-bold text-label-bold uppercase tracking-widest text-primary mb-2">{standOut.stats[0].title}</h4>
+              <p className="text-secondary font-body-md text-body-md">{standOut.stats[0].desc}</p>
             </div>
           </div>
           <div className="md:col-span-2 bento-border p-8 md:p-12 flex flex-col justify-between min-h-[220px]">
             <div className="flex justify-between items-start">
-              <span className="font-headline-xl text-headline-lg-mobile md:text-headline-xl font-black">24/7</span>
+              <span className="font-headline-xl text-headline-lg-mobile md:text-headline-xl font-black">{standOut.stats[1].value}</span>
               <span className="material-symbols-outlined text-primary text-3xl">support_agent</span>
             </div>
             <div>
-              <h4 className="font-label-bold text-label-bold uppercase tracking-widest text-primary mb-2">Continuous Support</h4>
-              <p className="text-secondary font-body-md text-body-md">Expert architectural consultation available around the clock for priority systems.</p>
+              <h4 className="font-label-bold text-label-bold uppercase tracking-widest text-primary mb-2">{standOut.stats[1].title}</h4>
+              <p className="text-secondary font-body-md text-body-md">{standOut.stats[1].desc}</p>
             </div>
           </div>
           <div className="md:col-span-1 bento-border p-8 md:p-12 bg-on-background text-on-primary flex flex-col justify-between min-h-[180px]">
-            <span className="font-headline-md text-headline-md text-primary">0ms</span>
+            <span className="font-headline-md text-headline-md text-primary">{standOut.stats[2].value}</span>
             <div>
-              <h4 className="font-label-bold text-label-bold uppercase tracking-widest mb-2">API Latency</h4>
-              <p className="text-surface-dim text-label-sm font-label-sm">Sub-millisecond data execution.</p>
+              <h4 className="font-label-bold text-label-bold uppercase tracking-widest mb-2">{standOut.stats[2].title}</h4>
+              <p className="text-surface-dim text-label-sm font-label-sm">{standOut.stats[2].desc}</p>
             </div>
           </div>
           <div className="md:col-span-2 bento-border p-8 md:p-12 flex flex-col justify-between min-h-[180px]">
-            <h4 className="font-label-bold text-label-bold uppercase tracking-widest text-primary mb-4">Precision Deployment</h4>
-            <p className="font-body-md text-body-md text-secondary">Every line of code undergoes automated security audits and performance stress testing before reaching production.</p>
+            <h4 className="font-label-bold text-label-bold uppercase tracking-widest text-primary mb-4">{standOut.stats[3].title}</h4>
+            <p className="font-body-md text-body-md text-secondary">{standOut.stats[3].desc}</p>
             <div className="flex gap-2 mt-8">
               {[1, 2, 3].map((i) => <div key={i} className="h-1 flex-1 bg-primary"></div>)}
               <div className="h-1 flex-1 bg-surface-muted border border-border-faint"></div>
@@ -175,7 +164,7 @@ export default function Services() {
           </div>
           <div className="md:col-span-1 bento-border p-8 md:p-12 bg-surface-muted flex flex-col justify-center items-center text-center min-h-[180px]">
             <span className="material-symbols-outlined text-primary text-5xl mb-4">public</span>
-            <span className="font-label-bold text-label-bold uppercase tracking-wider">Global Reach</span>
+            <span className="font-label-bold text-label-bold uppercase tracking-wider">{standOut.stats[4].title}</span>
           </div>
         </div>
       </section>

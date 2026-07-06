@@ -90,7 +90,7 @@ export function SaveButton({ onSave, saved, saving }) {
     <button
       onClick={onSave}
       disabled={saving}
-      className={`px-5 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors flex items-center gap-2 shrink-0 disabled:opacity-50 ${
+      className={`fixed top-6 right-6 z-30 px-5 py-2.5 text-sm font-bold uppercase tracking-wider transition-colors flex items-center gap-2 shrink-0 shadow-lg disabled:opacity-50 ${
         saved ? 'bg-green-600 text-white' : 'bg-[#1b1c1c] text-white hover:bg-[#106F89]'
       }`}
     >

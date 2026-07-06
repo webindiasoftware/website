@@ -6,6 +6,8 @@ import contentRoutes from './routes/content.js'
 import adminContentRoutes from './routes/adminContent.js'
 import authRoutes from './routes/auth.js'
 import uploadRoutes, { uploadDir } from './routes/upload.js'
+import submissionsRoutes from './routes/submissions.js'
+import adminSubmissionsRoutes from './routes/adminSubmissions.js'
 
 const app = express()
 
@@ -20,6 +22,8 @@ app.use('/api/content', contentRoutes)
 app.use('/api/admin/content', adminContentRoutes)
 app.use('/api/admin/upload', uploadRoutes)
 app.use('/api/auth', authRoutes)
+app.use('/api/submissions', submissionsRoutes)
+app.use('/api/admin/submissions', adminSubmissionsRoutes)
 
 app.get('/api/health', (req, res) => res.json({ ok: true }))
 

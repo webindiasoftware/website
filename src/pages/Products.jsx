@@ -4,7 +4,7 @@ import useScrollReveal from '../hooks/useScrollReveal'
 
 export default function Products() {
   const { data } = useData()
-  const { hero, items, standards, cta } = data.products
+  const { hero, heroButtons, ecosystemHeading, items, standards, standardIntro, cta, ctaSecondaryButtonText } = data.products
 
   const heroRef = useScrollReveal()
   const cardsRef = useScrollReveal()
@@ -23,10 +23,10 @@ export default function Products() {
             <p className="font-body-lg text-body-lg text-secondary max-w-2xl mb-10 leading-relaxed">{hero.subtext}</p>
             <div className="flex flex-wrap gap-4">
               <button className="bg-primary-container text-on-primary font-label-bold text-label-bold uppercase px-8 py-4 hover:bg-on-background transition-colors">
-                Explore Catalog
+                {heroButtons.primaryText}
               </button>
               <button className="border border-border-bold font-label-bold text-label-bold uppercase px-8 py-4 hover:bg-surface-muted transition-colors">
-                Technical Specs
+                {heroButtons.secondaryText}
               </button>
             </div>
           </div>
@@ -45,7 +45,7 @@ export default function Products() {
       <section ref={cardsRef} className="bg-surface-muted py-24 px-5 md:px-12 border-t border-b border-border-bold">
         <div className="max-w-container-max mx-auto">
           <div className="mb-16">
-            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg uppercase mb-4">Core Ecosystem</h2>
+            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg uppercase mb-4">{ecosystemHeading}</h2>
             <div className="w-24 h-1 bg-primary"></div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -74,9 +74,9 @@ export default function Products() {
       <section ref={stdRef} className="py-24 px-5 md:px-12 bg-surface-main">
         <div className="max-w-container-max mx-auto">
           <div className="text-center mb-16">
-            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg uppercase mb-4">The Softskirl Standard</h2>
+            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg uppercase mb-4">{standardIntro.heading}</h2>
             <p className="font-body-md text-body-md text-secondary max-w-xl mx-auto">
-              Built on a foundation of Swiss engineering principles, prioritizing clarity and performance over decoration.
+              {standardIntro.subtext}
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -103,7 +103,7 @@ export default function Products() {
               {cta.ctaText}
             </Link>
             <button className="border border-on-surface text-on-surface font-label-bold text-label-bold uppercase px-10 py-5 hover:bg-on-surface hover:text-surface-main transition-colors">
-              Book a Technical Demo
+              {ctaSecondaryButtonText}
             </button>
           </div>
         </div>

@@ -35,6 +35,21 @@ export function saveContent(key, data, token) {
   }).then((r) => r.data)
 }
 
+export function submitContact(payload) {
+  return request('/submissions', { method: 'POST', body: JSON.stringify(payload) }).then((r) => r.data)
+}
+
+export function getSubmissions(token) {
+  return request('/admin/submissions', { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.data)
+}
+
+export function deleteSubmission(id, token) {
+  return request(`/admin/submissions/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+}
+
 // Bypasses `request()` — a FormData body must not get a manual Content-Type,
 // the browser sets the multipart boundary itself.
 export async function uploadFile(file, token) {

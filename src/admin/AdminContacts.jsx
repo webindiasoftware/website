@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { useData } from '../context/DataContext'
+import { useSubmissions } from './useSubmissions'
 
 export default function AdminContacts() {
-  const { data, dispatch } = useData()
+  const { submissions, loading, error, remove } = useSubmissions()
   const [selected, setSelected] = useState(null)
 
   const del = (id) => {
     if (confirm('Delete this submission?')) {
-      dispatch({ type: 'DELETE_SUBMISSION', payload: id })
-      if (selected?.id === id) setSelected(null)
+      remove(id)
+      if (selected?._id === id) setSelected(null)
     }
   }
 
@@ -16,10 +16,15 @@ export default function AdminContacts() {
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-black tracking-tight text-[#1b1c1c]">Contact Submissions</h1>
-        <p className="text-sm text-gray-500 mt-1">{data.contactSubmissions.length} total submissions</p>
+        <p className="text-sm text-gray-500 mt-1">{submissions.length} total submissions</p>
+        {error && <p className="text-xs text-red-600 font-medium mt-1">{error}</p>}
       </div>
 
-      {data.contactSubmissions.length === 0 ? (
+      {loading ? (
+        <div className="bg-white border border-gray-200 p-16 text-center">
+          <p className="text-gray-400 text-sm">Loading submissions…</p>
+        </div>
+      ) : submissions.length === 0 ? (
         <div className="bg-white border border-gray-200 p-16 text-center">
           <span className="material-symbols-outlined text-5xl text-gray-200 block mb-4">inbox</span>
           <p className="text-gray-400 text-sm">No contact form submissions yet.</p>
@@ -32,11 +37,11 @@ export default function AdminContacts() {
               <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Submissions</span>
             </div>
             <div className="divide-y divide-gray-100 max-h-150 overflow-y-auto">
-              {data.contactSubmissions.map((s) => (
+              {submissions.map((s) => (
                 <button
-                  key={s.id}
+                  key={s._id}
                   onClick={() => setSelected(s)}
-                  className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${selected?.id === s.id ? 'bg-gray-100' : ''}`}
+                  className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${selected?._id === s._id ? 'bg-gray-100' : ''}`}
                 >
                   <div className="font-semibold text-sm text-[#1b1c1c]">{s.name}</div>
                   <div className="text-xs text-gray-400 mt-0.5">{s.email}</div>
@@ -44,7 +49,7 @@ export default function AdminContacts() {
                     <span className={`text-xs px-2 py-0.5 font-bold uppercase ${s.urgency === 'critical' ? 'bg-primary-fixed text-[#106F89]' : 'bg-gray-100 text-gray-500'}`}>
                       {s.urgency}
                     </span>
-                    <span className="text-xs text-gray-400">{new Date(s.submittedAt).toLocaleDateString()}</span>
+                    <span className="text-xs text-gray-400">{new Date(s.createdAt).toLocaleDateString()}</span>
                   </div>
                 </button>
               ))}
@@ -61,7 +66,7 @@ export default function AdminContacts() {
               <div>
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                   <h2 className="font-bold text-[#1b1c1c]">{selected.name}</h2>
-                  <button onClick={() => del(selected.id)} className="text-gray-300 hover:text-[#106F89] transition-colors flex items-center gap-1 text-xs font-bold uppercase">
+                  <button onClick={() => del(selected._id)} className="text-gray-300 hover:text-[#106F89] transition-colors flex items-center gap-1 text-xs font-bold uppercase">
                     <span className="material-symbols-outlined text-base">delete</span>
                     Delete
                   </button>
@@ -71,7 +76,7 @@ export default function AdminContacts() {
                     { label: 'Email', value: selected.email },
                     { label: 'Sector', value: selected.sector },
                     { label: 'Urgency', value: selected.urgency },
-                    { label: 'Submitted', value: new Date(selected.submittedAt).toLocaleString() },
+                    { label: 'Submitted', value: new Date(selected.createdAt).toLocaleString() },
                   ].map(({ label, value }) => (
                     <div key={label}>
                       <div className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">{label}</div>

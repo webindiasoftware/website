@@ -2,16 +2,19 @@ import { Link, useParams, Navigate } from 'react-router-dom'
 import { useData } from '../context/DataContext'
 import useScrollReveal from '../hooks/useScrollReveal'
 
-const tags = ['#SoftskiRL', '#EnterpriseIT', '#Engineering', '#Innovation', '#Software']
-
 export default function BlogDetail() {
   const { slug } = useParams()
   const { data } = useData()
+  const { tags, sidebarCta, relatedHeading, bottomCta } = data.blog
 
   const post = data.blog.posts.find(p => p.slug === slug)
   if (!post) return <Navigate to="/blog" replace />
 
-  const paragraphs = (post.content || '').split('\n\n').filter(Boolean)
+  // Older posts were authored as plain text (paragraphs separated by a blank
+  // line) before the rich text editor existed. New posts store real HTML.
+  const content = post.content || ''
+  const isHtml = /<[a-z][\s\S]*>/i.test(content)
+  const paragraphs = isHtml ? null : content.split('\n\n').filter(Boolean)
 
   const heroRef = useScrollReveal()
   const contentRef = useScrollReveal()
@@ -28,7 +31,7 @@ export default function BlogDetail() {
             {post.category}
           </span>
           <span className="text-secondary font-label-bold text-label-sm uppercase tracking-widest">
-            {post.date} · 5 min read
+            {post.date} · {post.readTime || '5 min read'}
           </span>
         </div>
         <h1 className="font-headline-xl text-headline-lg-mobile md:text-headline-xl text-on-background leading-tight max-w-4xl mb-6">
@@ -55,9 +58,13 @@ export default function BlogDetail() {
             <h2 className="font-headline-md text-headline-md text-on-background border-l-4 border-primary pl-6">
               {post.title}
             </h2>
-            {paragraphs.map((para, i) => (
-              <p key={i} className="font-body-md text-body-md text-on-surface leading-relaxed">{para}</p>
-            ))}
+            {isHtml ? (
+              <div className="rich-content font-body-md text-body-md text-on-surface" dangerouslySetInnerHTML={{ __html: content }} />
+            ) : (
+              paragraphs.map((para, i) => (
+                <p key={i} className="font-body-md text-body-md text-on-surface leading-relaxed">{para}</p>
+              ))
+            )}
           </div>
 
           {/* Tags */}
@@ -74,15 +81,15 @@ export default function BlogDetail() {
         <aside className="lg:col-span-4 flex flex-col gap-6">
           {/* CTA card */}
           <div className="bg-primary p-8 flex flex-col gap-6 text-surface-main">
-            <h3 className="font-headline-md text-headline-md leading-tight">Ready to Modernize?</h3>
+            <h3 className="font-headline-md text-headline-md leading-tight">{sidebarCta.heading}</h3>
             <p className="font-body-md text-body-md opacity-90">
-              Transform your operations with a custom-tailored solution. Request a live technical walkthrough today.
+              {sidebarCta.body}
             </p>
             <Link to="/contact" className="bg-on-background text-surface-main py-4 font-label-bold text-label-bold uppercase tracking-widest hover:bg-surface-main hover:text-on-background transition-colors text-center block">
-              Request a Demo
+              {sidebarCta.primaryButtonText}
             </Link>
             <Link to="/contact" className="border border-surface-main text-surface-main py-4 font-label-bold text-label-bold uppercase tracking-widest hover:bg-surface-main hover:text-primary transition-colors text-center block">
-              Contact Sales
+              {sidebarCta.secondaryButtonText}
             </Link>
           </div>
 
@@ -90,7 +97,7 @@ export default function BlogDetail() {
           {relatedPosts.length > 0 && (
             <div className="bento-border p-8">
               <h3 className="font-label-bold text-label-bold uppercase mb-6 border-b border-border-bold pb-2 inline-block">
-                Related Analysis
+                {relatedHeading}
               </h3>
               <div className="flex flex-col gap-8">
                 {relatedPosts.map((p) => (
@@ -109,13 +116,13 @@ export default function BlogDetail() {
       <section ref={ctaRef} className="mt-20 bento-border bg-on-background p-8 md:p-20 text-center relative overflow-hidden">
         <div className="relative z-10 flex flex-col items-center gap-8 max-w-2xl mx-auto">
           <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-surface-main leading-tight">
-            Interested in Learning More?
+            {bottomCta.heading}
           </h2>
           <p className="font-body-lg text-body-lg text-surface-muted">
-            Get in touch with us to discuss how our solutions can transform your operations.
+            {bottomCta.body}
           </p>
           <Link to="/contact" className="bg-primary text-surface-main px-10 md:px-12 py-5 font-label-bold text-label-bold uppercase tracking-widest hover:bg-surface-main hover:text-primary transition-all">
-            Get in Touch
+            {bottomCta.buttonText}
           </Link>
         </div>
         <div className="absolute top-0 right-0 w-64 h-64 border-t-8 border-r-8 border-primary opacity-20 -mr-16 -mt-16 pointer-events-none"></div>

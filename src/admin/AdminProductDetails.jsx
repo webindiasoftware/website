@@ -6,7 +6,7 @@ import { FileUpload } from './FileUpload'
 
 const blankDetail = {
   name: '', badge: '', badgeColor: 'bg-gray-50 text-gray-700 border-gray-200',
-  category: '', tagline: '', heroDesc: '', heroImg: '',
+  category: '', tagline: '', heroDesc: '', heroImg: '', favicon: '',
   capabilities: [],
   spotlight1: { title: '', desc: '', bullets: [], img: '' },
   spotlight2: { title: '', desc: '', bullets: [], img: '' },
@@ -112,6 +112,7 @@ export default function AdminProductDetails() {
           <Field label="Tagline" value={form.tagline} onChange={set('tagline')} />
           <Field label="Hero Description" value={form.heroDesc} onChange={set('heroDesc')} rows={3} />
           <FileUpload label="Hero Image" kind="image" value={form.heroImg} onChange={(url) => setForm(f => ({ ...f, heroImg: url }))} />
+          <FileUpload label="Favicon (shown next to the product name in the sub-navbar)" kind="image" value={form.favicon} onChange={(url) => setForm(f => ({ ...f, favicon: url }))} />
         </Section>
 
         <Section title="Core Capabilities">

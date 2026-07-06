@@ -10,7 +10,9 @@ const nav = [
   { to: '/admin/navbar-menu', label: 'Products Menu', icon: 'menu' },
   { to: '/admin/product-details', label: 'Product Details', icon: 'description' },
   { to: '/admin/blog', label: 'Blog', icon: 'article' },
-  { to: '/admin/contacts', label: 'Contacts', icon: 'mail' },
+  { to: '/admin/contact-page', label: 'Contact Page', icon: 'contact_page' },
+  { to: '/admin/footer', label: 'Footer', icon: 'view_agenda' },
+  { to: '/admin/contacts', label: 'Submissions', icon: 'mail' },
   { to: '/admin/settings', label: 'Settings', icon: 'settings' },
 ]
 

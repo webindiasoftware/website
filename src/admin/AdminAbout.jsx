@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useData } from '../context/DataContext'
 import { SaveButton, Section, Field, ListItem, AddButton } from './shared'
+import { FileUpload } from './FileUpload'
 
 let nextId = 200
 
@@ -43,9 +44,23 @@ export default function AdminAbout() {
         <Field label="Title" value={form.story.title} onChange={setNested('story', 'title')} />
         <Field label="Paragraph 1" value={form.story.body1} onChange={setNested('story', 'body1')} rows={4} />
         <Field label="Paragraph 2" value={form.story.body2} onChange={setNested('story', 'body2')} rows={4} />
+        <div className="mt-2">
+          <span className="text-xs font-bold uppercase tracking-widest text-gray-500 block mb-2">Timeline Cards</span>
+          <div className="space-y-3">
+            {form.timeline.map((t, i) => (
+              <ListItem key={t.id} index={i} onDelete={() => deleteFromList('timeline', t.id)}>
+                <Field label="Title" value={t.title} onChange={e => updateList('timeline', t.id, 'title', e.target.value)} />
+                <Field label="Description" value={t.desc} onChange={e => updateList('timeline', t.id, 'desc', e.target.value)} rows={2} />
+              </ListItem>
+            ))}
+          </div>
+          <AddButton onClick={() => addToList('timeline', { title: 'New Milestone', desc: 'Milestone description.' })} label="Add Timeline Card" />
+        </div>
       </Section>
 
       <Section title="Core Values">
+        <Field label="Section Heading" value={form.pillarsIntro.heading} onChange={setNested('pillarsIntro', 'heading')} />
+        <Field label="Section Subtext" value={form.pillarsIntro.subtext} onChange={setNested('pillarsIntro', 'subtext')} rows={2} />
         <div className="space-y-3">
           {form.values.map((v, i) => (
             <ListItem key={v.id} index={i} onDelete={() => deleteFromList('values', v.id)}>
@@ -61,14 +76,16 @@ export default function AdminAbout() {
       </Section>
 
       <Section title="Leadership Team">
-        <div className="space-y-3">
+        <Field label="Section Heading" value={form.leadershipIntro.heading} onChange={setNested('leadershipIntro', 'heading')} />
+        <Field label="Section Subtext" value={form.leadershipIntro.subtext} onChange={setNested('leadershipIntro', 'subtext')} rows={2} />
+        <div className="space-y-3 mt-4">
           {form.leaders.map((l, i) => (
             <ListItem key={l.id} index={i} onDelete={() => deleteFromList('leaders', l.id)}>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Name" value={l.name} onChange={e => updateList('leaders', l.id, 'name', e.target.value)} />
                 <Field label="Role" value={l.role} onChange={e => updateList('leaders', l.id, 'role', e.target.value)} />
               </div>
-              <Field label="Photo URL" value={l.img} onChange={e => updateList('leaders', l.id, 'img', e.target.value)} />
+              <FileUpload label="Photo" kind="image" value={l.img} onChange={(url) => updateList('leaders', l.id, 'img', url)} />
             </ListItem>
           ))}
         </div>

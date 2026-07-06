@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useData } from '../context/DataContext'
 import useScrollReveal from '../hooks/useScrollReveal'
+import { submitContact } from '../api/client'
 import defaultHeroVideo from '../assets/hero-video.mp4'
 
 import corporateImg from '../assets/corporate.png'
@@ -11,192 +12,82 @@ import educationImg from '../assets/education.png'
 import manufacturingImg from '../assets/manufacturing.png'
 import travelImg from '../assets/travel.png'
 
-const industryData = [
-  {
-    id: 1,
-    name: 'Corporate',
-    icon: 'business',
-    desc: 'Enterprise-level digital solutions including secure intranet networks, high-concurrency cloud databases, and bespoke administration portals.',
-    image: corporateImg,
-    caseStudy: 'FinTech Group Multi-Branch Cloud Sync'
-  },
-  {
-    id: 2,
-    name: 'Retail',
-    icon: 'storefront',
-    desc: 'Omnichannel e-commerce platforms, POS integrations, and real-time inventory systems for seamless commerce operations.',
-    image: retailImg,
-    caseStudy: 'SaaS POS Integration for National Apparel Chain'
-  },
-  {
-    id: 3,
-    name: 'Healthcare',
-    icon: 'medical_services',
-    desc: 'HIPAA-compliant telemedicine platforms, EMR synchronizations, and secure diagnostic portals for patient care.',
-    image: healthcareImg,
-    caseStudy: 'Low-Latency Video Telehealth System'
-  },
-  {
-    id: 4,
-    name: 'Education',
-    icon: 'school',
-    desc: 'LMS developments, virtual classroom spaces, student performance tracking systems, and online testing portals.',
-    image: educationImg,
-    caseStudy: 'State University Smart LMS Implementation'
-  },
-  {
-    id: 5,
-    name: 'Manufacturing',
-    icon: 'factory',
-    desc: 'Manufacturing IT solutions (e.g., Optimizing floor-to-cloud efficiency with custom MES and IIoT platforms).',
-    image: manufacturingImg,
-    caseStudy: 'Case Study: Automotive OEM Tech Upgrade'
-  },
-  {
-    id: 6,
-    name: 'Travel',
-    icon: 'flight',
-    desc: 'Global booking engine integrations, ticket reservation logic, flight status tracking APIs, and CRM dashboards.',
-    image: travelImg,
-    caseStudy: 'Airlines API Tunneling and Booking Redesign'
-  }
-]
+// Fallback artwork shown until an admin uploads a custom image per industry (home.industries[i].image).
+const industryFallbackImages = [corporateImg, retailImg, healthcareImg, educationImg, manufacturingImg, travelImg]
 
 
-const servicesList = [
+// Decorative overlay/sparkle badges for the Services grid, cycled by card index.
+// Content (title, description, image) is admin-editable via home.services in DataContext.
+const serviceVisuals = [
   {
-    id: 1,
-    title: 'Website Development',
-    desc: 'Custom websites and SEO-optimized code for maximum visibility and architectural cleanness. We build high-speed corporate architectures optimized for global scaling.',
-    bgImage: 'https://images.unsplash.com/photo-1547658719-da2b8116c1d0?auto=format&fit=crop&w=600&q=80',
     overlays: [
-      {
-        id: 'w-o1',
-        icon: 'bar_chart',
-        title: 'SEO & Web Vitals',
-        value: 'Status: Optimized',
-        pos: 'absolute bottom-6 left-6 w-[190px] md:w-[210px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300'
-      },
-      {
-        id: 'w-o2',
-        icon: 'speed',
-        title: 'Lighthouse Score',
-        value: 'Rating: 100/100',
-        pos: 'absolute top-6 right-6 w-[170px] md:w-[185px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300'
-      }
+      { id: 'o1', icon: 'bar_chart', title: 'SEO & Web Vitals', value: 'Status: Optimized', pos: 'absolute bottom-6 left-6 w-[190px] md:w-[210px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300' },
+      { id: 'o2', icon: 'speed', title: 'Lighthouse Score', value: 'Rating: 100/100', pos: 'absolute top-6 right-6 w-[170px] md:w-[185px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300' }
     ],
     sparkles: [
-      { id: 'w-s1', pos: 'absolute top-6 left-12 w-4 h-4 text-purple-300' },
-      { id: 'w-s2', pos: 'absolute bottom-8 right-16 w-5 h-5 text-purple-400' }
+      { id: 's1', pos: 'absolute top-6 left-12 w-4 h-4 text-purple-300' },
+      { id: 's2', pos: 'absolute bottom-8 right-16 w-5 h-5 text-purple-400' }
     ]
   },
   {
-    id: 2,
-    title: 'Mobile App Development',
-    desc: 'High-performance Android and iOS apps built with Flutter & React Native for seamless experiences. Native performance across viewports with reusable design structures.',
-    bgImage: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80',
     overlays: [
-      {
-        id: 'm-o1',
-        icon: 'sync',
-        title: 'Cross-Platform Sync',
-        value: 'iOS & Android Ready',
-        pos: 'absolute bottom-6 left-6 w-[190px] md:w-[210px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300'
-      },
-      {
-        id: 'm-o2',
-        icon: 'notifications_active',
-        title: 'Push Gateway',
-        value: 'Delivered: 99.9%',
-        pos: 'absolute top-6 right-6 w-[160px] md:w-[175px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300'
-      }
+      { id: 'o1', icon: 'sync', title: 'Cross-Platform Sync', value: 'iOS & Android Ready', pos: 'absolute bottom-6 left-6 w-[190px] md:w-[210px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300' },
+      { id: 'o2', icon: 'notifications_active', title: 'Push Gateway', value: 'Delivered: 99.9%', pos: 'absolute top-6 right-6 w-[160px] md:w-[175px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300' }
     ],
     sparkles: [
-      { id: 'm-s1', pos: 'absolute top-10 left-8 w-5 h-5 text-purple-300' },
-      { id: 'm-s2', pos: 'absolute bottom-10 right-20 w-4 h-4 text-purple-400' }
+      { id: 's1', pos: 'absolute top-10 left-8 w-5 h-5 text-purple-300' },
+      { id: 's2', pos: 'absolute bottom-10 right-20 w-4 h-4 text-purple-400' }
     ]
   },
   {
-    id: 3,
-    title: 'eCommerce Solutions',
-    desc: 'Secure, scalable marketplaces with easy payment integrations and real-time inventory management. Multi-vendor transactional logic with full security audits.',
-    bgImage: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=600&q=80',
     overlays: [
-      {
-        id: 'e-o1',
-        icon: 'credit_card',
-        title: 'Stripe Gateway',
-        value: 'Secure Portal Sync',
-        pos: 'absolute bottom-6 left-6 w-[180px] md:w-[195px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300'
-      },
-      {
-        id: 'e-o2',
-        icon: 'inventory_2',
-        title: 'Real-Time Stock',
-        value: 'Synced: 12ms ago',
-        pos: 'absolute top-6 right-6 w-[180px] md:w-[195px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300'
-      }
+      { id: 'o1', icon: 'credit_card', title: 'Stripe Gateway', value: 'Secure Portal Sync', pos: 'absolute bottom-6 left-6 w-[180px] md:w-[195px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300' },
+      { id: 'o2', icon: 'inventory_2', title: 'Real-Time Stock', value: 'Synced: 12ms ago', pos: 'absolute top-6 right-6 w-[180px] md:w-[195px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300' }
     ],
     sparkles: [
-      { id: 'e-s1', pos: 'absolute top-6 left-16 w-4 h-4 text-purple-400' },
-      { id: 'e-s2', pos: 'absolute bottom-6 right-12 w-5 h-5 text-purple-300' }
+      { id: 's1', pos: 'absolute top-6 left-16 w-4 h-4 text-purple-400' },
+      { id: 's2', pos: 'absolute bottom-6 right-12 w-5 h-5 text-purple-300' }
     ]
   },
   {
-    id: 4,
-    title: 'ERP & Custom Software',
-    desc: 'Business automation tools and robust ERP systems designed for optimized enterprise operations. Deep organizational flows built for complex enterprise requirements.',
-    bgImage: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
     overlays: [
-      {
-        id: 'er-o1',
-        icon: 'settings_suggest',
-        title: 'Process Automation',
-        value: 'Workflows: Active',
-        pos: 'absolute bottom-6 left-6 w-[190px] md:w-[210px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300'
-      },
-      {
-        id: 'er-o2',
-        icon: 'cloud_done',
-        title: 'Enterprise Sync',
-        value: 'Replica Set UP',
-        pos: 'absolute top-6 right-6 w-[160px] md:w-[175px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300'
-      }
+      { id: 'o1', icon: 'settings_suggest', title: 'Process Automation', value: 'Workflows: Active', pos: 'absolute bottom-6 left-6 w-[190px] md:w-[210px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300' },
+      { id: 'o2', icon: 'cloud_done', title: 'Enterprise Sync', value: 'Replica Set UP', pos: 'absolute top-6 right-6 w-[160px] md:w-[175px] bg-white border border-purple-200/80 rounded-xl p-3 shadow-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300' }
     ],
     sparkles: [
-      { id: 'er-s1', pos: 'absolute top-12 left-12 w-5 h-5 text-purple-300' },
-      { id: 'er-s2', pos: 'absolute bottom-12 right-12 w-4 h-4 text-purple-400' }
+      { id: 's1', pos: 'absolute top-12 left-12 w-5 h-5 text-purple-300' },
+      { id: 's2', pos: 'absolute bottom-12 right-12 w-4 h-4 text-purple-400' }
     ]
   }
 ]
 
 
 export default function Home() {
-  const { data, dispatch } = useData()
-  const { hero, services, products, industries, whyUs, testimonials, cta } = data.home
+  const { data } = useData()
+  const { hero, servicesIntro, services, productsIntro, products, industriesIntro, industries, whyUs, testimonials, cta } = data.home
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
   const [activeIndustry, setActiveIndustry] = useState(4)
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' })
   const [contactSubmitted, setContactSubmitted] = useState(false)
+  const [contactError, setContactError] = useState('')
 
-  const handleContactSubmit = (e) => {
+  const handleContactSubmit = async (e) => {
     e.preventDefault()
-    dispatch({
-      type: 'ADD_SUBMISSION',
-      payload: {
-        id: Date.now(),
+    setContactError('')
+    try {
+      await submitContact({
         name: contactForm.name,
         email: contactForm.email,
         sector: 'GENERAL INQUIRY',
         urgency: 'standard',
         brief: contactForm.message,
-        submittedAt: new Date().toISOString(),
-        read: false
-      }
-    })
-    setContactSubmitted(true)
-    setContactForm({ name: '', email: '', message: '' })
-    setTimeout(() => setContactSubmitted(false), 4000)
+      })
+      setContactSubmitted(true)
+      setContactForm({ name: '', email: '', message: '' })
+      setTimeout(() => setContactSubmitted(false), 4000)
+    } catch (err) {
+      setContactError(err.message || 'Failed to submit. Please try again.')
+    }
   }
 
   useEffect(() => {
@@ -222,9 +113,9 @@ export default function Home() {
   return (
     <main>
       {/* ── Hero ── */}
-      <section ref={heroRef} className="relative min-h-[80vh] flex items-center px-5 md:px-12 py-20 border-b border-border-bold bg-surface-main overflow-hidden">
-        <div className="max-w-container-max mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          <div className="lg:col-span-7 z-10">
+      <section ref={heroRef} className="relative flex items-center px-5 md:px-12 pt-2 pb-8 bg-surface-main">
+        <div className="max-w-container-max mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-6 z-10 transition-transform duration-500">
             <h1 className="font-headline-xl text-headline-lg-mobile md:text-headline-xl mb-6">
               {hero.headline}
             </h1>
@@ -238,16 +129,18 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="lg:col-span-5 relative min-h-[320px] lg:min-h-[400px]">
-            <div className="w-full h-full overflow-hidden min-h-80 rounded-2xl">
-              <video
-                src={hero.heroVideo || defaultHeroVideo}
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="w-full h-full object-cover "
-              />
+          <div className="lg:col-span-6 relative mt-10 lg:mt-0 lg:scale-105 transition-transform duration-500">
+            <div className="w-full overflow-hidden rounded-[2.5rem] border border-gray-100 bg-white p-3.5">
+              <div className="w-full rounded-[2rem] overflow-hidden">
+                <video
+                  src={hero.heroVideo || defaultHeroVideo}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-auto block"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -260,23 +153,25 @@ export default function Home() {
           {/* Header adapted from screenshot */}
           <div className="text-left mb-16 max-w-4xl">
             <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight leading-snug">
-              When digital infrastructure is optimized, growth is limitless
+              {servicesIntro.heading}
             </h2>
             <p className="text-gray-500 text-sm md:text-base mt-4 leading-relaxed max-w-3xl font-medium">
-              At Softskirl, we align code, mobile architectures, and enterprise custom software to build systems where performance drives scaling—turning complexity into clean digital velocity.
+              {servicesIntro.subtext}
             </p>
           </div>
 
           {/* 2x2 Grid Layout */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
-            {servicesList.map((service) => (
+            {services.map((service, idx) => {
+              const visuals = serviceVisuals[idx % serviceVisuals.length]
+              return (
               <div key={service.id} className="flex flex-col group">
                 
                 {/* Graphic panel */}
                 <div className="bg-[#f8fafc] border border-gray-100 relative w-full h-[280px] md:h-[320px] rounded-4xl flex items-center justify-center overflow-hidden transition-all duration-300 hover:shadow-md hover:border-gray-200/80 ">
                   
                   {/* Sparkles */}
-                  {service.sparkles.map((sparkle) => (
+                  {visuals.sparkles.map((sparkle) => (
                     <svg key={sparkle.id} className={`${sparkle.pos} animate-pulse`} viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 0L14.6 9.4L24 12L14.6 14.6L12 24L9.4 14.6L0 12L9.4 9.4L12 0Z" fill="#c084fc" />
                     </svg>
@@ -289,7 +184,7 @@ export default function Home() {
                   </div>
 
                   {/* Overlays */}
-                  {service.overlays.map((overlay) => (
+                  {visuals.overlays.map((overlay) => (
                     <div key={overlay.id} className={overlay.pos}>
                       <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center bg-[#f3e8ff] text-[#a855f7]">
                         <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -315,7 +210,8 @@ export default function Home() {
                 </div>
 
               </div>
-            ))}
+              )
+            })}
           </div>
 
         </div>
@@ -325,9 +221,9 @@ export default function Home() {
       <section ref={productsRef} className="py-24 px-5 md:px-12 bg-surface-muted">
         <div className="max-w-container-max mx-auto">
           <div className="text-center mb-16">
-            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-4">Our Products</h2>
+            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-4">{productsIntro.heading}</h2>
             <p className="font-body-md text-body-md text-secondary max-w-2xl mx-auto">
-              Advanced software solutions to streamline your business workflows.
+              {productsIntro.subtext}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -365,11 +261,11 @@ export default function Home() {
       </section>
 
       {/* ── Industries We Serve ── */}
-      <section ref={industriesRef} className="py-24 px-5 md:px-12 bg-surface-main relative overflow-hidden border-t border-border-bold">
+      <section ref={industriesRef} className="py-24 px-5 md:px-12 bg-surface-main relative overflow-hidden">
         <div className="max-w-container-max mx-auto relative">
           <div className="text-center mb-12">
-            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-4">Industries We Serve</h2>
-            <p className="font-body-md text-body-md text-secondary">Trusted across multiple sectors to help businesses grow efficiently.</p>
+            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-4">{industriesIntro.heading}</h2>
+            <p className="font-body-md text-body-md text-secondary">{industriesIntro.subtext}</p>
           </div>
 
           <div className="relative max-w-5xl mx-auto px-4 md:px-16 mt-8">
@@ -382,14 +278,14 @@ export default function Home() {
               
               {/* Row Left chevron */}
               <button
-                onClick={() => setActiveIndustry((idx) => (idx - 1 + industryData.length) % industryData.length)}
+                onClick={() => setActiveIndustry((idx) => (idx - 1 + industries.length) % industries.length)}
                 className="w-10 h-10 rounded-full bg-white shadow-md border border-gray-150 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all cursor-pointer text-gray-500 hover:text-gray-900 shrink-0"
               >
                 <span className="material-symbols-outlined text-[20px] font-bold">chevron_left</span>
               </button>
 
               <div style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} className="flex justify-between items-center flex-grow mx-2 md:mx-10 gap-2 md:gap-4 overflow-x-auto md:overflow-x-visible py-2">
-                {industryData.map((item, index) => {
+                {industries.map((item, index) => {
                   const isActive = index === activeIndustry;
                   return (
                     <button
@@ -405,7 +301,7 @@ export default function Home() {
                         {item.icon}
                       </span>
                       <span className={`text-[10px] md:text-[11px] font-bold tracking-tight transition-colors duration-300 ${isActive ? 'text-gray-900 font-extrabold' : 'text-gray-500'}`}>
-                        {item.name}
+                        {item.label}
                       </span>
                     </button>
                   );
@@ -414,7 +310,7 @@ export default function Home() {
 
               {/* Row Right chevron */}
               <button
-                onClick={() => setActiveIndustry((idx) => (idx + 1) % industryData.length)}
+                onClick={() => setActiveIndustry((idx) => (idx + 1) % industries.length)}
                 className="w-10 h-10 rounded-full bg-white shadow-md border border-gray-150 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all cursor-pointer text-gray-500 hover:text-gray-900 shrink-0"
               >
                 <span className="material-symbols-outlined text-[20px] font-bold">chevron_right</span>
@@ -426,7 +322,7 @@ export default function Home() {
               
               {/* Card Left chevron */}
               <button
-                onClick={() => setActiveIndustry((idx) => (idx - 1 + industryData.length) % industryData.length)}
+                onClick={() => setActiveIndustry((idx) => (idx - 1 + industries.length) % industries.length)}
                 className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 md:-translate-x-12 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all cursor-pointer text-gray-500 hover:text-gray-900"
               >
                 <span className="material-symbols-outlined text-[20px] font-bold">chevron_left</span>
@@ -440,13 +336,13 @@ export default function Home() {
                 {/* Left details */}
                 <div className="p-8 md:p-12 flex flex-col justify-center text-left bg-white z-10">
                   <span className="material-symbols-outlined text-5xl text-[#0b577a] mb-5 block">
-                    {industryData[activeIndustry].icon}
+                    {industries[activeIndustry].icon}
                   </span>
                   <h3 className="text-2xl md:text-3xl font-black text-gray-900 uppercase tracking-tight">
-                    {industryData[activeIndustry].name}
+                    {industries[activeIndustry].label}
                   </h3>
                   <p className="text-gray-500 text-sm md:text-base mt-4 leading-relaxed font-medium">
-                    {industryData[activeIndustry].desc}
+                    {industries[activeIndustry].desc}
                   </p>
                 </div>
 
@@ -455,14 +351,14 @@ export default function Home() {
                   <div className="flex-grow relative aspect-video md:aspect-auto min-h-[250px] md:min-h-0 overflow-hidden">
                     <img
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                      src={industryData[activeIndustry].image}
-                      alt={industryData[activeIndustry].name}
+                      src={industries[activeIndustry].image || industryFallbackImages[activeIndustry % industryFallbackImages.length]}
+                      alt={industries[activeIndustry].label}
                     />
                   </div>
                   <div className="bg-white border-t border-gray-100 px-6 py-5 shrink-0 text-left">
                     <p className="text-sm font-bold text-gray-800 tracking-tight flex items-center gap-2">
                       <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
-                      {industryData[activeIndustry].caseStudy}
+                      {industries[activeIndustry].caseStudy}
                     </p>
                   </div>
                 </div>
@@ -470,7 +366,7 @@ export default function Home() {
 
               {/* Card Right chevron */}
               <button
-                onClick={() => setActiveIndustry((idx) => (idx + 1) % industryData.length)}
+                onClick={() => setActiveIndustry((idx) => (idx + 1) % industries.length)}
                 className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 md:translate-x-12 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all cursor-pointer text-gray-500 hover:text-gray-900"
               >
                 <span className="material-symbols-outlined text-[20px] font-bold">chevron_right</span>
@@ -482,7 +378,7 @@ export default function Home() {
       </section>
 
       {/* ── Why Choose Us ── */}
-      <section ref={whyRef} className="py-24 px-5 md:px-12 bg-surface-main border-t border-border-bold">
+      <section ref={whyRef} className="py-24 px-5 md:px-12 bg-surface-main">
         <div className="max-w-container-max mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-5 flex flex-col justify-center">
@@ -540,32 +436,38 @@ export default function Home() {
             {/* Left Column details */}
             <div className="lg:col-span-6 text-left space-y-6">
               <h2 className="font-headline-xl text-headline-lg-mobile md:text-headline-xl text-white uppercase leading-none">
-                Start Your<br />Next Project
+                {cta.headline}
               </h2>
               <p className="font-body-lg text-body-lg text-slate-200 max-w-xl leading-relaxed opacity-95">
-                Have a customized requirement or enterprise software architecture to build? Contact us today to deploy your sandbox systems.
+                {cta.body}
               </p>
-              
+
               <div className="space-y-4 pt-6 border-t border-white/10 max-w-md">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-[#106F89]">phone_iphone</span>
-                  <p className="text-sm text-slate-200 font-semibold">+91 33 4004 8122</p>
+                  <p className="text-sm text-slate-200 font-semibold">{cta.phone}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-[#106F89]">alternate_email</span>
-                  <p className="text-sm text-slate-200 font-semibold">direct-inquiry@softskirl.com</p>
+                  <p className="text-sm text-slate-200 font-semibold">{cta.email}</p>
                 </div>
               </div>
             </div>
 
             {/* Right Column form card */}
             <div className="lg:col-span-6 bg-white/5 border border-white/10 backdrop-blur rounded-[24px] p-8 md:p-10 shadow-2xl">
-              <h3 className="text-xl font-bold text-white mb-6 text-left">Get a Response in 2 Hours</h3>
-              
+              <h3 className="text-xl font-bold text-white mb-6 text-left">{cta.formHeading}</h3>
+
               {contactSubmitted && (
                 <div className="mb-6 p-4 bg-teal-950/40 border border-[#106F89]/50 text-teal-300 font-semibold text-sm flex items-center gap-3 rounded-lg text-left">
                   <span className="material-symbols-outlined text-teal-400">check_circle</span>
                   Thank you! Your request has been logged successfully.
+                </div>
+              )}
+              {contactError && (
+                <div className="mb-6 p-4 bg-red-950/40 border border-red-500/50 text-red-300 font-semibold text-sm flex items-center gap-3 rounded-lg text-left">
+                  <span className="material-symbols-outlined text-red-400">error</span>
+                  {contactError}
                 </div>
               )}
 
@@ -608,7 +510,7 @@ export default function Home() {
                   type="submit"
                   className="w-full bg-[#106F89] hover:bg-[#0c596d] text-white font-label-bold text-label-bold uppercase py-4 rounded-xl transition-all font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98 mt-2"
                 >
-                  Submit Brief
+                  {cta.ctaText}
                   <span className="material-symbols-outlined text-sm">arrow_forward</span>
                 </button>
               </form>

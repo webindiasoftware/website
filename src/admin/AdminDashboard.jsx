@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
 import { useData } from '../context/DataContext'
+import { useSubmissions } from './useSubmissions'
 
 export default function AdminDashboard() {
   const { data } = useData()
+  const { submissions } = useSubmissions()
   const publishedPosts = data.blog.posts.filter(p => p.published).length
-  const totalSubmissions = data.contactSubmissions.length
-  const unreadSubmissions = data.contactSubmissions.filter(s => !s.read).length
+  const totalSubmissions = submissions.length
+  const unreadSubmissions = submissions.filter(s => !s.read).length
 
   const stats = [
     { label: 'Blog Posts', value: publishedPosts, icon: 'article', link: '/admin/blog', color: 'text-blue-600' },
@@ -62,19 +64,19 @@ export default function AdminDashboard() {
         {/* Recent submissions */}
         <div className="bg-white border border-gray-200 p-6">
           <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">Recent Submissions</h2>
-          {data.contactSubmissions.length === 0 ? (
+          {submissions.length === 0 ? (
             <p className="text-sm text-gray-400 py-4 text-center">No submissions yet</p>
           ) : (
             <div className="space-y-3">
-              {data.contactSubmissions.slice(0, 4).map((s) => (
-                <div key={s.id} className="border-b border-gray-100 pb-3">
+              {submissions.slice(0, 4).map((s) => (
+                <div key={s._id} className="border-b border-gray-100 pb-3">
                   <div className="font-medium text-sm text-[#1b1c1c]">{s.name}</div>
                   <div className="text-xs text-gray-400">{s.email} · {s.sector}</div>
                 </div>
               ))}
-              {data.contactSubmissions.length > 4 && (
+              {submissions.length > 4 && (
                 <Link to="/admin/contacts" className="text-xs text-[#106F89] font-bold uppercase tracking-wider">
-                  View all {data.contactSubmissions.length} →
+                  View all {submissions.length} →
                 </Link>
               )}
             </div>

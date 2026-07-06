@@ -5,7 +5,8 @@ import { useData } from '../context/DataContext'
 export default function Footer() {
   const [email, setEmail] = useState('')
   const { data } = useData()
-  const { companyName, tagline } = data.global
+  const { companyName, logo, tagline } = data.global
+  const { navLinks, legalPages } = data.footer
 
   return (
     <footer className="bg-surface-main border-t border-border-bold w-full">
@@ -13,7 +14,7 @@ export default function Footer() {
         {/* Brand */}
         <div className="sm:col-span-2 md:col-span-1">
           <div className="text-headline-md font-headline-md text-on-background mb-6 font-black tracking-tighter">
-            {companyName}
+            {logo ? <img src={logo} alt={companyName} className="h-9 w-auto" /> : companyName}
           </div>
           <p className="font-body-md text-body-md text-secondary mb-6">{tagline}</p>
           <div className="flex gap-4">
@@ -30,8 +31,8 @@ export default function Footer() {
         <div>
           <h4 className="font-label-bold text-label-bold uppercase mb-6 tracking-wider">Navigation</h4>
           <ul className="space-y-4">
-            {[['/', 'Home'], ['/services', 'Services'], ['/products', 'Products'], ['/about', 'About'], ['/blog', 'Blog']].map(([to, label]) => (
-              <li key={to}>
+            {navLinks.map(({ id, to, label }) => (
+              <li key={id}>
                 <Link to={to} className="font-body-md text-body-md text-on-background hover:text-primary transition-colors">{label}</Link>
               </li>
             ))}
@@ -42,9 +43,9 @@ export default function Footer() {
         <div>
           <h4 className="font-label-bold text-label-bold uppercase mb-6 tracking-wider">Legal</h4>
           <ul className="space-y-4">
-            {['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Security Standards'].map((item) => (
-              <li key={item}>
-                <a href="#" className="font-body-md text-body-md text-on-background hover:text-primary transition-colors">{item}</a>
+            {legalPages.map(({ id, slug, title }) => (
+              <li key={id}>
+                <Link to={`/legal/${slug}`} className="font-body-md text-body-md text-on-background hover:text-primary transition-colors">{title}</Link>
               </li>
             ))}
           </ul>

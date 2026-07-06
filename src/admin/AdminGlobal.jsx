@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useData } from '../context/DataContext'
 import { SaveButton, Section, Field } from './shared'
+import { FileUpload } from './FileUpload'
 
 export default function AdminGlobal() {
   const { data, dispatch } = useData()
@@ -28,6 +29,12 @@ export default function AdminGlobal() {
       <Section title="Brand">
         <Field label="Company Name" value={form.companyName} onChange={set('companyName')} />
         <Field label="Tagline" value={form.tagline} onChange={set('tagline')} rows={2} />
+        <FileUpload
+          label="Logo (leave empty to show the company name as text)"
+          kind="image"
+          value={form.logo}
+          onChange={(url) => { setForm(f => ({ ...f, logo: url })); setSaved(false) }}
+        />
       </Section>
 
       <Section title="Contact Information">

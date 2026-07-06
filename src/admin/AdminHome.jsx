@@ -88,20 +88,44 @@ export default function AdminHome() {
 
       {/* Services */}
       <Section title="Services (Home Preview)">
-        <div className="space-y-3">
+        <Field
+          label="Section Heading"
+          value={form.servicesIntro.heading}
+          onChange={e => { setForm(f => ({ ...f, servicesIntro: { ...f.servicesIntro, heading: e.target.value } })); touch() }}
+          rows={2}
+        />
+        <Field
+          label="Section Subtext"
+          value={form.servicesIntro.subtext}
+          onChange={e => { setForm(f => ({ ...f, servicesIntro: { ...f.servicesIntro, subtext: e.target.value } })); touch() }}
+          rows={2}
+        />
+        <div className="space-y-3 mt-4">
           {form.services.map((s, i) => (
             <ListItem key={s.id} index={i} onDelete={() => deleteFromList('services', s.id)}>
               <Field label="Title" value={s.title} onChange={e => updateList('services', s.id, 'title', e.target.value)} />
               <Field label="Description" value={s.desc} onChange={e => updateList('services', s.id, 'desc', e.target.value)} rows={2} />
+              <FileUpload label="Image" kind="image" value={s.bgImage} onChange={(url) => updateList('services', s.id, 'bgImage', url)} />
             </ListItem>
           ))}
         </div>
-        <AddButton onClick={() => addToList('services', { icon: 'star', title: 'New Service', desc: 'Service description.' })} label="Add Service" />
+        <AddButton onClick={() => addToList('services', { icon: 'star', title: 'New Service', desc: 'Service description.', bgImage: '' })} label="Add Service" />
       </Section>
 
       {/* Products */}
       <Section title="Featured Products (Home Preview)">
-        <div className="space-y-3">
+        <Field
+          label="Section Heading"
+          value={form.productsIntro.heading}
+          onChange={e => { setForm(f => ({ ...f, productsIntro: { ...f.productsIntro, heading: e.target.value } })); touch() }}
+        />
+        <Field
+          label="Section Subtext"
+          value={form.productsIntro.subtext}
+          onChange={e => { setForm(f => ({ ...f, productsIntro: { ...f.productsIntro, subtext: e.target.value } })); touch() }}
+          rows={2}
+        />
+        <div className="space-y-3 mt-4">
           {form.products.map((p, i) => (
             <ListItem key={p.id} index={i} onDelete={() => deleteFromList('products', p.id)}>
               <div className="grid grid-cols-2 gap-3">
@@ -118,14 +142,28 @@ export default function AdminHome() {
 
       {/* Industries */}
       <Section title="Industries We Serve">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Field
+          label="Section Heading"
+          value={form.industriesIntro.heading}
+          onChange={e => { setForm(f => ({ ...f, industriesIntro: { ...f.industriesIntro, heading: e.target.value } })); touch() }}
+        />
+        <Field
+          label="Section Subtext"
+          value={form.industriesIntro.subtext}
+          onChange={e => { setForm(f => ({ ...f, industriesIntro: { ...f.industriesIntro, subtext: e.target.value } })); touch() }}
+          rows={2}
+        />
+        <div className="space-y-3 mt-4">
           {form.industries.map((ind, i) => (
             <ListItem key={ind.id} index={i} onDelete={() => deleteFromList('industries', ind.id)}>
               <Field label="Label" value={ind.label} onChange={e => updateList('industries', ind.id, 'label', e.target.value)} />
+              <Field label="Description" value={ind.desc} onChange={e => updateList('industries', ind.id, 'desc', e.target.value)} rows={2} />
+              <Field label="Case Study" value={ind.caseStudy} onChange={e => updateList('industries', ind.id, 'caseStudy', e.target.value)} />
+              <FileUpload label="Image" kind="image" value={ind.image} onChange={(url) => updateList('industries', ind.id, 'image', url)} />
             </ListItem>
           ))}
         </div>
-        <AddButton onClick={() => addToList('industries', { icon: 'domain', label: 'New Industry' })} label="Add Industry" />
+        <AddButton onClick={() => addToList('industries', { icon: 'domain', label: 'New Industry', desc: 'Industry description.', caseStudy: '', image: '' })} label="Add Industry" />
       </Section>
 
       {/* Why Us */}
@@ -182,6 +220,11 @@ export default function AdminHome() {
       <Section title="CTA Section">
         <Field label="Headline" value={form.cta.headline} onChange={setNested('cta', 'headline')} />
         <Field label="Body" value={form.cta.body} onChange={setNested('cta', 'body')} rows={2} />
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Phone Number" value={form.cta.phone} onChange={setNested('cta', 'phone')} />
+          <Field label="Email" value={form.cta.email} onChange={setNested('cta', 'email')} />
+        </div>
+        <Field label="Form Heading" value={form.cta.formHeading} onChange={setNested('cta', 'formHeading')} />
         <Field label="Button Text" value={form.cta.ctaText} onChange={setNested('cta', 'ctaText')} />
       </Section>
     </div>

@@ -4,7 +4,7 @@ import useScrollReveal from '../hooks/useScrollReveal'
 
 export default function About() {
   const { data } = useData()
-  const { hero, story, values, leaders, cta } = data.about
+  const { hero, story, timeline, values, pillarsIntro, leaders, leadershipIntro, cta } = data.about
 
   const heroRef = useScrollReveal()
   const storyRef = useScrollReveal()
@@ -48,20 +48,15 @@ export default function About() {
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bento-border p-8 flex flex-col justify-between aspect-square bg-surface-muted">
-                <span className="font-headline-xl text-primary-container opacity-20 text-6xl font-black">01</span>
-                <div>
-                  <h4 className="font-label-bold text-label-bold mb-2 uppercase">Origins</h4>
-                  <p className="text-secondary font-body-md text-body-md">Founded in a high-stakes silicon environment focused on performance tuning.</p>
+              {timeline.map(({ id, title, desc }, i) => (
+                <div key={id} className={`bento-border p-8 flex flex-col justify-between aspect-square ${i === 1 ? 'bg-on-background text-on-primary' : 'bg-surface-muted'}`}>
+                  <span className={`font-headline-xl opacity-20 text-6xl font-black ${i === 1 ? 'text-white' : 'text-primary-container'}`}>{String(i + 1).padStart(2, '0')}</span>
+                  <div>
+                    <h4 className="font-label-bold text-label-bold mb-2 uppercase">{title}</h4>
+                    <p className={`font-body-md text-body-md ${i === 1 ? 'text-surface-variant' : 'text-secondary'}`}>{desc}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="bento-border p-8 flex flex-col justify-between aspect-square bg-on-background text-on-primary">
-                <span className="font-headline-xl text-white opacity-20 text-6xl font-black">02</span>
-                <div>
-                  <h4 className="font-label-bold text-label-bold mb-2 uppercase">Transformation</h4>
-                  <p className="text-surface-variant font-body-md text-body-md">Scaled into a full-spectrum digital infrastructure firm serving global enterprises.</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -71,8 +66,8 @@ export default function About() {
       <section ref={valuesRef} className="bg-on-background text-on-primary py-24 md:py-32">
         <div className="px-5 md:px-12 max-w-container-max mx-auto">
           <div className="mb-16 md:mb-20 text-center">
-            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-4">DNA OF PERFORMANCE</h2>
-            <p className="font-body-lg text-body-lg text-surface-variant">Our foundational pillars define every line of code we ship.</p>
+            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-4">{pillarsIntro.heading}</h2>
+            <p className="font-body-lg text-body-lg text-surface-variant">{pillarsIntro.subtext}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {values.map(({ id, icon, title, desc }) => (
@@ -92,8 +87,8 @@ export default function About() {
       <section ref={leaderRef} className="px-5 md:px-12 py-24 md:py-32 max-w-container-max mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-4">
           <div>
-            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg">EXECUTIVE LEADERSHIP</h2>
-            <p className="text-secondary font-body-lg text-body-lg mt-2">The minds behind the kinetic engine.</p>
+            <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg">{leadershipIntro.heading}</h2>
+            <p className="text-secondary font-body-lg text-body-lg mt-2">{leadershipIntro.subtext}</p>
           </div>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">

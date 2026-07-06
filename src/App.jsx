@@ -10,6 +10,7 @@ import Contact from './pages/Contact'
 import Blog from './pages/Blog'
 import BlogDetail from './pages/BlogDetail'
 import ProductDetail from './pages/ProductDetail'
+import LegalPage from './pages/LegalPage'
 import AdminLayout from './admin/AdminLayout'
 import AdminGuard from './admin/AdminGuard'
 import AdminLogin from './admin/AdminLogin'
@@ -22,6 +23,8 @@ import AdminNavbarMenu from './admin/AdminNavbarMenu'
 import AdminProductDetails from './admin/AdminProductDetails'
 import AdminBlog from './admin/AdminBlog'
 import AdminContacts from './admin/AdminContacts'
+import AdminContact from './admin/AdminContact'
+import AdminFooter from './admin/AdminFooter'
 import AdminGlobal from './admin/AdminGlobal'
 
 function ScrollToTop() {
@@ -54,6 +57,7 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogDetail />} />
+          <Route path="/legal/:slug" element={<LegalPage />} />
         </Route>
 
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -67,6 +71,8 @@ export default function App() {
             <Route path="navbar-menu" element={<AdminNavbarMenu />} />
             <Route path="product-details" element={<AdminProductDetails />} />
             <Route path="blog" element={<AdminBlog />} />
+            <Route path="contact-page" element={<AdminContact />} />
+            <Route path="footer" element={<AdminFooter />} />
             <Route path="contacts" element={<AdminContacts />} />
             <Route path="settings" element={<AdminGlobal />} />
           </Route>

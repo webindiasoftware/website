@@ -30,6 +30,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen]           = useState(false)
   const [dropOpen, setDropOpen]       = useState(false)
   const [mobileProds, setMobileProds] = useState(false)
+  const [isScrolled, setIsScrolled]   = useState(false)
   const { pathname } = useLocation()
   const { data }     = useData()
   const productCategories = data.navbarProducts
@@ -37,6 +38,13 @@ export default function Navbar() {
 
   useEffect(() => { setIsOpen(false); setDropOpen(false) }, [pathname])
   useEffect(() => () => clearTimeout(leaveTimer.current), [])
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const openDrop   = () => { clearTimeout(leaveTimer.current); setDropOpen(true) }
   const startClose = () => { leaveTimer.current = setTimeout(() => setDropOpen(false), 150) }
@@ -44,16 +52,32 @@ export default function Navbar() {
   const isActive = (to) => to === '/' ? pathname === '/' : pathname.startsWith(to)
   const isProductsActive = pathname.startsWith('/products')
 
+  const isProductDetail = pathname.startsWith('/products/') && pathname.split('/')[2];
+  let currentProductSlug = isProductDetail ? pathname.split('/')[2].toLowerCase() : '';
+  const currentProductDetail = isProductDetail ? data.productDetails?.[currentProductSlug] : null;
+  let productName = 'softskirl';
+  if (currentProductSlug === 'fitbuddy') productName = 'FitBuddy';
+  else if (currentProductSlug === 'skirlerp') productName = 'SkirlERP';
+  else if (currentProductSlug === 'skirlworks') productName = 'SkirlWorks';
+  else if (currentProductSlug === 'skirlhrms') productName = 'SkirlHRMS';
+  else if (currentProductSlug === 'skirlmms') productName = 'SkirlMMS';
+  else if (currentProductSlug === 'prodiq') productName = 'ProdIQ';
+  else if (currentProductSlug) productName = currentProductSlug.charAt(0).toUpperCase() + currentProductSlug.slice(1);
+
   return (
-    <header className="w-full sticky top-0 z-50 bg-surface-main border-b border-border-bold">
+    <header className={`w-full sticky top-0 z-50 bg-surface-main transition-shadow duration-300 ${isScrolled && !isProductDetail ? 'shadow-md' : ''}`}>
       <nav className="relative flex justify-between items-center h-20 px-5 md:px-12 max-w-container-max mx-auto">
 
         {/* Logo */}
         <Link
           to="/"
-          className="text-headline-md font-headline-md font-black text-on-background tracking-tighter transition-opacity duration-200 hover:opacity-75"
+          className="flex items-center text-headline-md font-headline-md font-black text-on-background tracking-tighter transition-opacity duration-200 hover:opacity-75"
         >
-          {data.global.companyName}
+          {data.global.logo ? (
+            <img src={data.global.logo} alt={data.global.companyName} className="h-9 w-auto" />
+          ) : (
+            data.global.companyName
+          )}
         </Link>
 
         {/* Desktop links */}
@@ -181,6 +205,60 @@ export default function Navbar() {
           </span>
         </button>
       </nav>
+
+      {/* ── Secondary Product Sub-Navbar ── */}
+      {isProductDetail && (
+        <div className="bg-[#fafbfe]/90 py-3.5 px-5 md:px-12 backdrop-blur-md">
+          <div className="flex justify-between items-center max-w-container-max mx-auto">
+            <div className="flex items-center gap-2.5">
+              {currentProductDetail?.favicon ? (
+                <img src={currentProductDetail.favicon} alt={productName} className="w-6 h-6 shrink-0 rounded-md object-cover" />
+              ) : currentProductSlug === 'skirlworks' ? (
+                <svg className="w-6 h-6 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="44" cy="50" r="20" stroke="#106F89" strokeWidth="8" strokeDasharray="90 30" strokeLinecap="round" transform="rotate(-45 44 50)" />
+                  <circle cx="56" cy="50" r="20" stroke="#10B981" strokeWidth="8" strokeDasharray="90 30" strokeLinecap="round" transform="rotate(135 56 50)" />
+                </svg>
+              ) : currentProductSlug === 'fitbuddy' ? (
+                <svg className="w-6 h-6 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M30 50C30 35 40 25 50 35C60 25 70 35 70 50C70 65 50 80 50 80C50 80 30 65 30 50Z" fill="#106F89" />
+                </svg>
+              ) : currentProductSlug === 'prodiq' ? (
+                <svg className="w-6 h-6 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="25" y="55" width="12" height="25" rx="4" fill="#106F89" />
+                  <rect x="44" y="35" width="12" height="45" rx="4" fill="#10B981" />
+                  <rect x="63" y="20" width="12" height="60" rx="4" fill="#0B263F" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="20" y="20" width="60" height="60" rx="16" fill="url(#paint0_linear_subnav)" />
+                  <circle cx="50" cy="50" r="18" fill="#FFF" />
+                  <defs>
+                    <linearGradient id="paint0_linear_subnav" x1="20" y1="20" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#106F89"/>
+                      <stop offset="1" stopColor="#10B981"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              )}
+              <span className="text-base font-black text-[#0B263F] tracking-tight">{productName}</span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="relative flex items-center gap-1 text-gray-500 font-bold text-[10px] uppercase tracking-wider cursor-pointer hover:text-gray-900 px-2 py-1.5 rounded-lg hover:bg-gray-100/50 transition-colors">
+                <span className="material-symbols-outlined text-sm">language</span>
+                <span>English</span>
+              </div>
+              
+              <a
+                href="#query-form"
+                className="bg-[#0B263F] hover:bg-[#106F89] text-white px-4 py-2 font-bold text-[10px] uppercase tracking-wider rounded-full transition-all duration-300 shadow-sm"
+              >
+                Sign In
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Mobile menu ── */}
       {isOpen && (
